@@ -12,9 +12,17 @@ import argparse
 # Default path to the Unreal Engine simulator used during development
 DEFAULT_UE4_PATH = r"C:\Users\newso\Documents\AirSimExperiments\BlocksBuild\WindowsNoEditor\Blocks\Binaries\Win64\Blocks.exe"
 
+# Allow overriding the path via environment variable
+ENV_UE4_PATH = os.environ.get("UE4_PATH")
+ue4_default = ENV_UE4_PATH if ENV_UE4_PATH else DEFAULT_UE4_PATH
+
 parser = argparse.ArgumentParser(description="Optical flow navigation script")
 parser.add_argument("--manual-nudge", action="store_true", help="Enable manual nudge at frame 5 for testing")
-parser.add_argument("--ue4-path", default=DEFAULT_UE4_PATH, help="Path to the Unreal Engine executable")
+parser.add_argument(
+    "--ue4-path",
+    default=ue4_default,
+    help="Path to the Unreal Engine executable (or set UE4_PATH env variable)",
+)
 args = parser.parse_args()
 
 from uav.interface import exit_flag, start_gui
