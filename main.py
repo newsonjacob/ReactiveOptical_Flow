@@ -135,7 +135,7 @@ try:
             client.moveByVelocityAsync(2, 0, 0, 2).join()
 
         # --- Optical flow processing ---
-        good_old, flow_vectors, flow_std = tracker.process_frame(gray, start_time)
+        good_old, flow_vectors, flow_std = tracker.process_frame(gray)
         magnitudes = np.linalg.norm(flow_vectors, axis=1)
         h, w = gray.shape
         good_old = good_old.reshape(-1, 2)  # Ensure proper shape

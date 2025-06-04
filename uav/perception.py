@@ -39,7 +39,7 @@ class OpticalFlowTracker:
         self.prev_pts = cv2.goodFeaturesToTrack(gray_frame, mask=None, **self.feature_params)
         self.prev_time = time.time()
 
-    def process_frame(self, gray, _unused_start_time):  # ignore external time
+    def process_frame(self, gray):
         """Track features in *gray* and return vectors with standard deviation."""
         if self.prev_gray is None or self.prev_pts is None:
             self.initialize(gray)
