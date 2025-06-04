@@ -1,0 +1,28 @@
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Log files
+*.log
+
+# Video outputs
+*.avi
+
+# Flow logs
+flow_logs/
+
+# IDE directories
+.vscode/
+.idea/
+
+# Python virtual environments
+venv/
+.env/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Backup files
+*~
