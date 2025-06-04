@@ -70,6 +70,7 @@ navigator = Navigator(client)
 
 frame_count = 0
 start_time = time.time()
+MAX_SIM_DURATION = 30  # seconds
 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 os.makedirs("flow_logs", exist_ok=True)
 log_file = open(f"flow_logs/full_log_{timestamp}.csv", 'w')
@@ -98,6 +99,9 @@ try:
         frame_count += 1
         loop_start = time.time()
         time_now = time.time()  # <-- Add this line
+        if time_now - start_time >= MAX_SIM_DURATION:
+            print("⏱️ Time limit reached — landing and stopping.")
+            break
 
         # --- Get image from AirSim ---
         t0 = time.time()
