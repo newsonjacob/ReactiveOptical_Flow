@@ -2,24 +2,21 @@
 import cv2
 import numpy as np
 import time
+from collections import deque
 
 class FlowHistory:
-    def __init__(self, size=5, alpha=0.5):
+    def __init__(self, size=5):
         self.size = size
-        self.alpha = alpha
-        self.smooth = None
+        self.window = deque(maxlen=size)
 
     def update(self, left, center, right):
-        new = np.array([left, center, right])
-        if self.smooth is None:
-            self.smooth = new
-        else:
-            self.smooth = self.alpha * new + (1 - self.alpha) * self.smooth
+        self.window.append(np.array([left, center, right]))
 
     def average(self):
-        if self.smooth is None:
+        if not self.window:
             return 0.0, 0.0, 0.0
-        return tuple(self.smooth)
+        arr = np.array(self.window)
+        return tuple(arr.mean(axis=0))
 
 class OpticalFlowTracker:
     def __init__(self, lk_params, feature_params):
