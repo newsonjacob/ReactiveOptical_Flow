@@ -10,7 +10,6 @@ __pycache__/
 *.avi
 
 # Flow logs
-flow_logs/
 
 # IDE directories
 .vscode/
