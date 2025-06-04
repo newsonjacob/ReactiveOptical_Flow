@@ -8,8 +8,13 @@ import subprocess
 import math
 from airsim import ImageRequest, ImageType
 import argparse
+
+# Default path to the Unreal Engine simulator used during development
+DEFAULT_UE4_PATH = r"C:\Users\newso\Documents\AirSimExperiments\BlocksBuild\WindowsNoEditor\Blocks\Binaries\Win64\Blocks.exe"
+
 parser = argparse.ArgumentParser(description="Optical flow navigation script")
 parser.add_argument("--manual-nudge", action="store_true", help="Enable manual nudge at frame 5 for testing")
+parser.add_argument("--ue4-path", default=DEFAULT_UE4_PATH, help="Path to the Unreal Engine executable")
 args = parser.parse_args()
 
 from uav.interface import exit_flag, start_gui
@@ -33,7 +38,7 @@ param_refs = {
 start_gui(param_refs)
 
 # === LAUNCH UE4 SIMULATION ===
-ue4_exe = r"C:\Users\newso\Documents\AirSimExperiments\BlocksBuild\WindowsNoEditor\Blocks\Binaries\Win64\Blocks.exe"
+ue4_exe = args.ue4_path
 try:
     sim_process = subprocess.Popen([ue4_exe, "-windowed", "-ResX=1280", "-ResY=720"])
     print("Launching Unreal Engine simulation...")
