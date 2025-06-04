@@ -14,7 +14,7 @@ This project implements a real-time optical flow-based navigation system for an 
 
 ```
 AirSimExperiments/
-├── main.py               # Entry point of the program
+├── main.py               # Entry point of the program (calls main())
 ├── uav/
 │   ├── __init__.py       # Makes the uav folder a module
 │   ├── perception.py     # Optical flow tracker and flow history
