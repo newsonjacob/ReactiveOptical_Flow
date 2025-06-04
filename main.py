@@ -7,6 +7,10 @@ import os
 import subprocess
 import math
 from airsim import ImageRequest, ImageType
+import argparse
+parser = argparse.ArgumentParser(description="Optical flow navigation script")
+parser.add_argument("--manual-nudge", action="store_true", help="Enable manual nudge at frame 5 for testing")
+args = parser.parse_args()
 
 from uav.interface import exit_flag, start_gui
 from uav.perception import OpticalFlowTracker, FlowHistory
@@ -108,8 +112,7 @@ try:
             print("Initialized optical flow tracker.")
             continue
 
-        # Manual nudge at frame 5 to test flow responsiveness
-        if frame_count == 5:
+        if args.manual_nudge and frame_count == 5:
             print("🔧 Manual nudge forward for test")
             client.moveByVelocityAsync(2, 0, 0, 2).join()
 
