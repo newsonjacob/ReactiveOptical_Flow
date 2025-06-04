@@ -69,3 +69,7 @@ frame,time,features,flow_left,flow_center,flow_right
 * Visualization of flow vectors in real time
 * Command line argument parsing for tuning thresholds
 * ROS bridge for physical deployment
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
