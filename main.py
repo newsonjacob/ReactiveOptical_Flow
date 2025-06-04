@@ -104,18 +104,23 @@ try:
             break
 
         # --- Get image from AirSim ---
+        # Capture image from the simulator
         t0 = time.time()
         responses = client.simGetImages([
             ImageRequest("oakd_camera", ImageType.Scene, False, True)  # compress=True for JPEG
         ])
+        t1 = time.time()  # after simGetImages
         response = responses[0]
         if response.width == 0 or response.height == 0 or len(response.image_data_uint8) == 0:
             out.write(last_vis_img)
             continue
 
         img1d = np.frombuffer(response.image_data_uint8, dtype=np.uint8)
+        t2 = time.time()  # before decoding JPEG
         img = cv2.imdecode(img1d, cv2.IMREAD_COLOR)
-        t1 = time.time()
+        t3 = time.time()  # after decoding
+        simgetimage_s = t1 - t0
+        decode_s = t3 - t2
         if img is None:
             out.write(last_vis_img)
             continue
@@ -271,7 +276,7 @@ try:
             f"{smooth_L:.3f},{smooth_C:.3f},{smooth_R:.3f},{flow_std:.3f},"
             f"{pos.x_val:.2f},{pos.y_val:.2f},{pos.z_val:.2f},{yaw:.2f},{speed:.2f},{state_str},{collided},"
             f"{brake_thres:.2f},{dodge_thres:.2f},{probe_req:.2f},{actual_fps:.2f},"
-            f"{t1-t0:.3f},{t1-t0:.3f},0.0,{time.time()-loop_start:.3f}\n"
+            f"{simgetimage_s:.3f},{decode_s:.3f},0.0,{time.time()-loop_start:.3f}\n"
         )
 
         print(f"Actual FPS: {actual_fps:.2f}")
