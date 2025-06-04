@@ -41,8 +41,13 @@ AirSimExperiments/
 
 * Python 3.8+
 * AirSim installed and configured
-* OpenCV (`pip install opencv-python`)
-* NumPy (`pip install numpy`)
+* Python dependencies listed in `requirements.txt`
+
+Install the Python packages with:
+
+```bash
+pip install -r requirements.txt
+```
 
 ## Running the Simulation
 
