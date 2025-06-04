@@ -49,6 +49,15 @@ Install the Python packages with:
 pip install -r requirements.txt
 ```
 
+## Running Tests
+
+The unit tests use [pytest](https://pytest.org/). After installing the
+requirements, run the tests from the project root:
+
+```bash
+pytest
+```
+
 ## Running the Simulation
 
 1. Launch the AirSim Unreal environment.
