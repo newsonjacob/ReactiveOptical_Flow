@@ -8,6 +8,10 @@ __pycache__/
 
 # Video outputs
 *.avi
+*.mp4
+*.mov
+*.mkv
+*.wmv
 
 # Flow logs
 
