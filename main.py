@@ -82,7 +82,7 @@ fps_list = []
 img = None  # Add this before your main loop
 
 try:
-    while not exit_flag[0]:
+    while not exit_flag.is_set():
         frame_count += 1
         loop_start = time.time()
         time_now = time.time()  # <-- Add this line
