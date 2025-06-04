@@ -47,11 +47,12 @@ AirSimExperiments/
 ## Running the Simulation
 
 1. Launch the AirSim Unreal environment.
-2. Run the script:
+2. Run the script. You can override the path to the Unreal Engine executable using `--ue4-path`:
 
    ```bash
-   python main.py
+   python main.py --ue4-path "C:\\Path\\To\\Blocks.exe"
    ```
+   If omitted, the path defaults to the value used during development.
 3. The GUI displays the STOP button along with left/center/right flow values and the current state. Click STOP to end the simulation cleanly.
 
 ## Example Log Format
