@@ -44,6 +44,15 @@ AirSimExperiments/
 * OpenCV (`pip install opencv-python`)
 * NumPy (`pip install numpy`)
 
+## Running Tests
+
+The unit tests use [pytest](https://pytest.org/). After installing the
+requirements, run the tests from the project root:
+
+```bash
+pytest
+```
+
 ## Running the Simulation
 
 1. Launch the AirSim Unreal environment.
