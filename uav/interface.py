@@ -1,4 +1,5 @@
 # uav/interface.py
+"""Simple Tkinter GUI utilities for controlling the simulation."""
 import tkinter as tk
 from threading import Thread, Event
 
@@ -6,6 +7,7 @@ from threading import Thread, Event
 exit_flag = Event()
 
 def launch_control_gui(param_refs):
+    """Launch the full control window using mutable parameter refs."""
     def on_stop():
         """Signal the main loop to terminate."""
         exit_flag.set()
@@ -43,12 +45,14 @@ def launch_control_gui(param_refs):
     root.mainloop()
 
 def start_gui(param_refs=None):
+    """Start the GUI in a background thread."""
     if param_refs is None:
         Thread(target=gui_exit, daemon=True).start()
     else:
         Thread(target=lambda: launch_control_gui(param_refs), daemon=True).start()
 
 def gui_exit():
+    """Display a minimal stop button for emergency exit."""
     root = tk.Tk()
     root.title("Stop UAV")
     root.geometry("200x100")

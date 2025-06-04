@@ -1,16 +1,20 @@
 # uav/navigation.py
+"""Navigation utilities for issuing motion commands to an AirSim drone."""
 import time
 import math
 import airsim
 
 class Navigator:
+    """Issue high level movement commands and track state."""
     def __init__(self, client):
+        """Store the AirSim client used for all commands."""
         self.client = client
         self.braked = False
         self.dodging = False
         self.last_movement_time = time.time()
 
     def get_state(self):
+        """Return the drone position, yaw angle and speed."""
         state = self.client.getMultirotorState()
         pos = state.kinematics_estimated.position
         ori = state.kinematics_estimated.orientation
@@ -20,12 +24,14 @@ class Navigator:
         return pos, yaw, speed
 
     def brake(self):
+        """Stop the drone immediately."""
         print("🛑 Braking")
         self.client.moveByVelocityAsync(0, 0, 0, 1).join()
         self.braked = True
         return "brake"
 
     def dodge(self, smooth_L, smooth_C, smooth_R):
+        """Perform a lateral dodge based on flow magnitudes."""
         if smooth_L < smooth_R - 10:
             direction = "left"
         elif smooth_R < smooth_L - 10:
@@ -58,6 +64,7 @@ class Navigator:
 
 
     def resume_forward(self):
+        """Resume normal forward velocity."""
         print("✅ Resuming forward motion")
         self.client.moveByVelocityAsync(2, 0, 0, duration=3,
             drivetrain=airsim.DrivetrainType.ForwardOnly,
@@ -68,6 +75,7 @@ class Navigator:
         return "resume"
 
     def blind_forward(self):
+        """Move forward when no features are detected."""
         print("⚠️ No features — continuing blind forward motion")
         self.client.moveByVelocityAsync(2, 0, 0, duration=2,
             drivetrain=airsim.DrivetrainType.ForwardOnly,
@@ -76,12 +84,14 @@ class Navigator:
         return "blind_forward"
 
     def nudge(self):
+        """Gently push the drone forward when stalled."""
         print("⚠️ Low flow + zero velocity — nudging forward")
         self.client.moveByVelocityAsync(0.5, 0, 0, 1).join()
         self.last_movement_time = time.time()
         return "nudge"
 
     def reinforce(self):
+        """Reissue the forward command to reinforce motion."""
         print("🔁 Reinforcing forward motion")
         self.client.moveByVelocityAsync(2, 0, 0, duration=3,
             drivetrain=airsim.DrivetrainType.ForwardOnly,
@@ -90,6 +100,7 @@ class Navigator:
         return "resume_reinforce"
 
     def timeout_recover(self):
+        """Move slowly forward after a command timeout."""
         print("⏳ Timeout — forcing recovery motion")
         self.client.moveByVelocityAsync(0.5, 0, 0, 1).join()
         self.last_movement_time = time.time()
