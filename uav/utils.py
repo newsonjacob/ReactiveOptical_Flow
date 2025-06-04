@@ -3,6 +3,7 @@ import math
 import cv2
 import numpy as np
 import airsim
+import os
 
 def apply_clahe(gray_image):
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
@@ -22,3 +23,28 @@ def get_drone_state(client):
     vel = state.kinematics_estimated.linear_velocity
     speed = get_speed(vel)
     return pos, yaw, speed
+
+
+def retain_recent_logs(log_dir: str, keep: int = 5) -> None:
+    """Keep only the `keep` most recent log files in *log_dir*.
+
+    Files are ordered by modification time. Older files beyond the
+    desired count are silently removed.
+    """
+
+    try:
+        logs = [
+            os.path.join(log_dir, f)
+            for f in os.listdir(log_dir)
+            if f.endswith(".csv")
+        ]
+    except FileNotFoundError:
+        return
+
+    logs.sort(key=os.path.getmtime, reverse=True)
+
+    for old_log in logs[keep:]:
+        try:
+            os.remove(old_log)
+        except OSError:
+            pass
