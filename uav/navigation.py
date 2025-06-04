@@ -31,14 +31,25 @@ class Navigator:
         return "brake"
 
     def dodge(self, smooth_L, smooth_C, smooth_R):
-        """Perform a lateral dodge based on flow magnitudes."""
-        if smooth_L < smooth_R - 10:
+        """Perform a lateral dodge based on flow magnitudes.
+
+        If the difference between left and right flow values is small but the
+        center flow is high, force a dodge toward the slightly safer side
+        instead of skipping.
+        """
+        if smooth_L + 10 < smooth_R:
             direction = "left"
-        elif smooth_R < smooth_L - 10:
+        elif smooth_R + 10 < smooth_L:
             direction = "right"
         else:
-            print("❌ Dodge ambiguous — skipping")
-            return "no_dodge"
+            ratio = smooth_C / max(smooth_L, smooth_R) if max(smooth_L, smooth_R) > 0 else 0
+            if smooth_C > 1.5 and ratio > 0.75:
+                # flat wall straight ahead – pick the lower flow side
+                direction = "left" if smooth_L <= smooth_R else "right"
+                print(f"⚠️ Ambiguous dodge -> forcing {direction}")
+            else:
+                print("❌ Dodge ambiguous — skipping")
+                return "no_dodge"
 
         lateral = 1.0 if direction == "right" else -1.0
         strength = 0.5 if max(smooth_L, smooth_R) > 100 else 1.0

@@ -64,6 +64,18 @@ def test_dodge_left_sets_flags_and_calls():
     assert fut2.join_called is True
 
 
+def test_ambiguous_dodge_forces_lower_flow_side():
+    client = DummyClient()
+    nav = Navigator(client)
+    result = nav.dodge(10, 10.5, 11)
+    assert result == 'dodge_left'
+    assert client.moveByVelocityBodyFrameAsync.call_count == 2
+    call1 = client.moveByVelocityBodyFrameAsync.call_args_list[0]
+    assert call1.args == (0, 0, 0, 0.2)
+    call2 = client.moveByVelocityBodyFrameAsync.call_args_list[1]
+    assert call2.args == (0.0, -1.0, 0, 2.0)
+
+
 def test_resume_forward_clears_flags_and_calls():
     client = DummyClient()
     nav = Navigator(client)
