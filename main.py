@@ -168,7 +168,6 @@ try:
             pos, yaw, speed = get_drone_state(client)
             brake_thres = 35 + 15 * speed
             dodge_thres = 5 + 3 * speed
-            probe_req = 15 + 3 * speed
 
             center_high = smooth_C > dodge_thres
             side_diff = abs(smooth_L - smooth_R)
