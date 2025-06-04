@@ -33,6 +33,7 @@ param_refs = {
 start_gui(param_refs)
 
 # === LAUNCH UE4 SIMULATION ===
+sim_process = None
 ue4_exe = r"C:\Users\newso\Documents\AirSimExperiments\BlocksBuild\WindowsNoEditor\Blocks\Binaries\Win64\Blocks.exe"
 try:
     sim_process = subprocess.Popen([ue4_exe, "-windowed", "-ResX=1280", "-ResY=720"])
@@ -260,7 +261,7 @@ finally:
     except Exception as e:
         print("Landing error:", e)
 
-    if sim_process:
+    if sim_process is not None:
         sim_process.terminate()
         print("UE4 simulation closed.")
 
