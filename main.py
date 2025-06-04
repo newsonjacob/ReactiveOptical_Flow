@@ -18,11 +18,7 @@ from uav.navigation import Navigator
 from uav.utils import get_drone_state
 
 # GUI parameter and status holders
-brake_base = [35.0]
-dodge_base = [5.0]
 param_refs = {
-    'brake': [brake_base],
-    'dodge': [dodge_base],
     'L': [0.0],
     'C': [0.0],
     'R': [0.0],
