@@ -1,4 +1,4 @@
-﻿# uav/navigation.py
+# uav/navigation.py
 import time
 import math
 import airsim
