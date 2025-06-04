@@ -65,7 +65,11 @@ start_time = time.time()
 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 os.makedirs("flow_logs", exist_ok=True)
 log_file = open(f"flow_logs/full_log_{timestamp}.csv", 'w')
-log_file.write("frame,time,features,flow_left,flow_center,flow_right,speed,simgetimage_s,decode_s,processing_s,loop_s\n")
+log_file.write(
+    "frame,time,features,flow_left,flow_center,flow_right,"
+    "flow_std,pos_x,pos_y,pos_z,yaw,speed,state,collided,"
+    "brake_thres,dodge_thres,probe_req,fps,simgetimage_s,decode_s,processing_s,loop_s\n"
+)
 retain_recent_logs("flow_logs")
 
 # Video writer setup
@@ -161,6 +165,9 @@ try:
 
         # === Navigation logic ===
         state_str = "none"
+        brake_thres = 0.0
+        dodge_thres = 0.0
+        probe_req = 0.0
         if len(good_old) < 5:
             if smooth_L > 1.5 and smooth_R > 1.5 and smooth_C < 0.2:
                 state_str = navigator.brake()
@@ -222,7 +229,11 @@ try:
             log_file.close()
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             log_file = open(f"flow_logs/full_log_{timestamp}.csv", 'w')
-            log_file.write("frame,time,features,flow_left,flow_center,flow_right,speed,simgetimage_s,decode_s,processing_s,loop_s\n")
+            log_file.write(
+                "frame,time,features,flow_left,flow_center,flow_right,"
+                "flow_std,pos_x,pos_y,pos_z,yaw,speed,state,collided,"
+                "brake_thres,dodge_thres,probe_req,fps,simgetimage_s,decode_s,processing_s,loop_s\n"
+            )
             retain_recent_logs("flow_logs")
 
             # === Reset video writer ===
@@ -232,20 +243,26 @@ try:
 
         out.write(vis_img)
 
-        # === Logging ===
-        log_file.write(
-            f"{frame_count},{time_now:.2f},{len(good_old)},{smooth_L:.3f},{smooth_C:.3f},{smooth_R:.3f},{speed:.2f},"
-            f"{t1-t0:.3f},{t1-t0:.3f},0.0,{time.time()-loop_start:.3f}\n"
-        )
-
         # Throttle loop to target FPS
         elapsed = time.time() - time_now
         if elapsed < frame_duration:
             time.sleep(frame_duration - elapsed)
 
-        # After processing each frame, before throttling
         actual_fps = 1 / (time.time() - loop_start)
         fps_list.append(actual_fps)
+
+        pos, yaw, speed = get_drone_state(client)
+        collision = client.simGetCollisionInfo()
+        collided = int(getattr(collision, "has_collided", False))
+
+        log_file.write(
+            f"{frame_count},{time_now:.2f},{len(good_old)},"
+            f"{smooth_L:.3f},{smooth_C:.3f},{smooth_R:.3f},{flow_std:.3f},"
+            f"{pos.x_val:.2f},{pos.y_val:.2f},{pos.z_val:.2f},{yaw:.2f},{speed:.2f},{state_str},{collided},"
+            f"{brake_thres:.2f},{dodge_thres:.2f},{probe_req:.2f},{actual_fps:.2f},"
+            f"{t1-t0:.3f},{t1-t0:.3f},0.0,{time.time()-loop_start:.3f}\n"
+        )
+
         print(f"Actual FPS: {actual_fps:.2f}")
         print(f"Features detected: {len(good_old)}")
 

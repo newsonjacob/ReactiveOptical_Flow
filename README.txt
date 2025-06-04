@@ -59,8 +59,8 @@ AirSimExperiments/
 ## Example Log Format
 
 ```
-frame,time,features,flow_left,flow_center,flow_right
-42,13.23,117,4.320,10.827,6.910
+frame,time,features,flow_left,flow_center,flow_right,flow_std,pos_x,pos_y,pos_z,yaw,speed,state,collided,brake_thres,dodge_thres,probe_req,fps
+1,0.05,120,3.2,1.1,2.0,0.8,0.12,0.00,-2.00,0.0,1.7,resume,0,50.0,8.0,20.0,18.5
 ```
 
 ## Future Improvements
