@@ -15,7 +15,7 @@ args = parser.parse_args()
 from uav.interface import exit_flag, start_gui
 from uav.perception import OpticalFlowTracker, FlowHistory
 from uav.navigation import Navigator
-from uav.utils import get_drone_state
+from uav.utils import get_drone_state, retain_recent_logs
 
 # GUI parameter and status holders
 brake_base = [35.0]
@@ -65,6 +65,7 @@ timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 os.makedirs("flow_logs", exist_ok=True)
 log_file = open(f"flow_logs/full_log_{timestamp}.csv", 'w')
 log_file.write("frame,time,features,flow_left,flow_center,flow_right,speed,simgetimage_s,decode_s,processing_s,loop_s\n")
+retain_recent_logs("flow_logs")
 
 # Video writer setup
 fourcc = cv2.VideoWriter_fourcc(*'MJPG')
@@ -221,6 +222,7 @@ try:
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             log_file = open(f"flow_logs/full_log_{timestamp}.csv", 'w')
             log_file.write("frame,time,features,flow_left,flow_center,flow_right,speed,simgetimage_s,decode_s,processing_s,loop_s\n")
+            retain_recent_logs("flow_logs")
 
             # === Reset video writer ===
             out.release()
