@@ -41,6 +41,10 @@ class Navigator:
             direction = "left"
         elif smooth_R + 10 < smooth_L:
             direction = "right"
+        elif smooth_C > 1.0:
+            # flat wall straight ahead – pick the lower flow side
+            direction = "left" if smooth_L <= smooth_R else "right"
+            print(f"⚠️ Ambiguous dodge -> forcing {direction}")
         else:
             ratio = smooth_C / max(smooth_L, smooth_R) if max(smooth_L, smooth_R) > 0 else 0
             if smooth_C > 1.5 and ratio > 0.75:
