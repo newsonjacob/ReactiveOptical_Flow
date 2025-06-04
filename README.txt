@@ -70,6 +70,16 @@ pytest
 
 3. The GUI displays the STOP button along with left/center/right flow values and the current state. Click STOP to end the simulation cleanly.
 
+## Batch Runs
+
+Execute multiple runs back to back using `batch_runs.py`:
+
+```bash
+python batch_runs.py --count 3
+```
+
+Omit `--count` to use the default of 5 runs.
+
 ## Example Log Format
 
 ```
