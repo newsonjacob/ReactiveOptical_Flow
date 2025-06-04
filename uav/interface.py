@@ -1,12 +1,14 @@
 # uav/interface.py
 import tkinter as tk
-from threading import Thread
+from threading import Thread, Event
 
-exit_flag = [False]
+# Use a threading.Event to signal when the application should exit
+exit_flag = Event()
 
 def launch_control_gui(param_refs):
     def on_stop():
-        exit_flag[0] = True
+        """Signal the main loop to terminate."""
+        exit_flag.set()
 
     def on_reset():
         param_refs['reset_flag'][0] = True
@@ -60,6 +62,6 @@ def gui_exit():
     root = tk.Tk()
     root.title("Stop UAV")
     root.geometry("200x100")
-    btn = tk.Button(root, text="STOP", font=("Arial", 20), command=lambda: exit_flag.__setitem__(0, True))
+    btn = tk.Button(root, text="STOP", font=("Arial", 20), command=exit_flag.set)
     btn.pack(expand=True)
     root.mainloop()
