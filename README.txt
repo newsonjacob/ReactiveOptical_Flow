@@ -7,7 +7,7 @@ This project implements a real-time optical flow-based navigation system for an 
 * 🧠 Optical flow tracking using Lucas-Kanade method with CLAHE enhancement
 * 📊 Flow history smoothing for left, center, and right partitions
 * ✈️ Autonomous decision logic: brake, dodge, resume, and blind forward
-* 🪟 GUI button to end the simulation safely
+* 🪟 Simple GUI showing a STOP button, live flow magnitudes, and the current state
 * 📁 Structured modular code with reusable components
 
 ## Project Structure
@@ -19,7 +19,7 @@ AirSimExperiments/
 │   ├── __init__.py       # Makes the uav folder a module
 │   ├── perception.py     # Optical flow tracker and flow history
 │   ├── navigation.py     # Obstacle avoidance and motion logic
-│   └── interface.py      # GUI stop button
+│   └── interface.py      # Tkinter GUI displaying flow data and STOP
 ├── flow_logs/            # Output directory for log files
 └── README.md             # You're here!
 ```
@@ -53,7 +53,8 @@ AirSimExperiments/
    python main.py --ue4-path "C:\\Path\\To\\Blocks.exe"
    ```
    If omitted, the path defaults to the value used during development.
-3. Click the GUI stop button to end the simulation cleanly.
+
+3. The GUI displays the STOP button along with left/center/right flow values and the current state. Click STOP to end the simulation cleanly.
 
 ## Example Log Format
 
