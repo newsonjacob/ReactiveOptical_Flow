@@ -14,7 +14,6 @@ class Navigator:
         self.last_movement_time = time.time()
         self.grace_period_end_time = 0
         self.settle_end_time = 0
-        self.current_motion_until = 0
 
     def get_state(self):
         """Return the drone position, yaw angle and speed."""
@@ -64,7 +63,6 @@ class Navigator:
             0,
             duration
         ).join()
-        self.current_motion_until = time.time() + duration  # ← Track motion end time
 
         self.dodging = True
         self.braked = False
