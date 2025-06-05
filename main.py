@@ -78,7 +78,7 @@ def main():
     frame_count = 0
     start_time = time.time()
     MAX_SIM_DURATION = 60  # seconds
-    GOAL_X = 25.5  # distance from start in AirSim coordinates
+    GOAL_X = 29  # distance from start in AirSim coordinates
     GOAL_RADIUS = 1.0  # meters
     MIN_PROBE_FEATURES = 5
     FLOW_STD_MAX = 10.0
@@ -127,6 +127,25 @@ def main():
         while not exit_flag.is_set():
             frame_count += 1
             time_now = time.time()  # <-- Add this line
+            # Handle settle phase after dodge
+            if navigator.settling:
+                if time_now < navigator.settle_end_time:
+                    if time_now > navigator.current_motion_until:
+                        print("⏳ Settling — reissuing slow forward creep")
+                        client.moveByVelocityAsync(0.3, 0, 0, duration=1)
+                        navigator.current_motion_until = time_now + 1.0
+                    state_str = "settling"
+                    param_refs['state'][0] = state_str
+                    obstacle_detected = 0
+                    try:
+                        frame_queue.put_nowait(vis_img)
+                    except Exception:
+                        pass
+                    continue
+                else:
+                    print("✅ Settle period over — resuming evaluation")
+                    navigator.settling = False
+
             if time_now - start_time >= MAX_SIM_DURATION:
                 print("⏱️ Time limit reached — landing and stopping.")
                 break
@@ -232,11 +251,11 @@ def main():
 
                 # Adaptive thresholds tuned for quicker reactions
                 brake_thres = 20 + 10 * speed
-                dodge_thres = 3 + 2 * speed
+                dodge_thres = 2 + 0.5 * speed
 
-                center_high = smooth_C > dodge_thres
+                center_high = smooth_C > dodge_thres or smooth_C > 2 * min(smooth_L, smooth_R)
                 side_diff = abs(smooth_L - smooth_R)
-                side_safe = side_diff > 10 and (smooth_L < 100 or smooth_R < 100)
+                side_safe = side_diff > 0.3 * smooth_C and (smooth_L < 100 or smooth_R < 100)
 
                 probe_reliable = probe_count > MIN_PROBE_FEATURES and probe_mag > 0.05
                 in_grace_period = time_now < navigator.grace_period_end_time

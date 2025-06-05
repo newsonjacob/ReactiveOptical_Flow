@@ -7,13 +7,14 @@ import airsim
 class Navigator:
     """Issue high level movement commands and track state."""
     def __init__(self, client):
-        """Store the AirSim client used for all commands."""
         self.client = client
         self.braked = False
         self.dodging = False
+        self.settling = False
         self.last_movement_time = time.time()
-        self.grace_period_end_time = 0  # ← Add this line
-
+        self.grace_period_end_time = 0
+        self.settle_end_time = 0
+        self.current_motion_until = 0
 
     def get_state(self):
         """Return the drone position, yaw angle and speed."""
@@ -28,12 +29,11 @@ class Navigator:
     def brake(self):
         """Stop the drone immediately."""
         print("🛑 Braking")
-        self.client.moveByVelocityAsync(0, 0, 0, 1).join()
+        self.client.moveByVelocityAsync(0, 0, 0, 1)
         self.braked = True
         return "brake"
 
     def dodge(self, smooth_L, smooth_C, smooth_R, duration: float = 2.0):
-        """Perform a lateral dodge based on flow magnitudes."""
         print(f"🔍 Dodge Decision — L: {smooth_L:.1f}, C: {smooth_C:.1f}, R: {smooth_R:.1f}")
 
         left_safe = smooth_L < 0.8 * smooth_C
@@ -54,8 +54,8 @@ class Navigator:
         strength = 0.5 if max(smooth_L, smooth_R) > 100 else 1.0
         forward_speed = 0.0 if smooth_C > 1.0 else 0.3
 
-        # Cut existing motion before dodge
-        self.client.moveByVelocityBodyFrameAsync(0, 0, 0, 0.2).join()
+        # Stop briefly
+        self.client.moveByVelocityBodyFrameAsync(0, 0, 0, 0.2)
 
         print(f"🔀 Dodging {direction} (strength {strength:.1f}, forward {forward_speed:.1f})")
         self.client.moveByVelocityBodyFrameAsync(
@@ -63,10 +63,13 @@ class Navigator:
             lateral * strength,
             0,
             duration
-        ).join()
+        )
+        self.current_motion_until = time.time() + duration  # ← Track motion end time
 
         self.dodging = True
         self.braked = False
+        self.settling = True
+        self.settle_end_time = time.time() + 2.0
         self.last_movement_time = time.time()
         return f"dodge_{direction}"
 
@@ -93,7 +96,7 @@ class Navigator:
     def nudge(self):
         """Gently push the drone forward when stalled."""
         print("⚠️ Low flow + zero velocity — nudging forward")
-        self.client.moveByVelocityAsync(0.5, 0, 0, 1).join()
+        self.client.moveByVelocityAsync(0.5, 0, 0, 1)
         self.last_movement_time = time.time()
         return "nudge"
 
@@ -109,7 +112,7 @@ class Navigator:
     def timeout_recover(self):
         """Move slowly forward after a command timeout."""
         print("⏳ Timeout — forcing recovery motion")
-        self.client.moveByVelocityAsync(0.5, 0, 0, 1).join()
+        self.client.moveByVelocityAsync(0.5, 0, 0, 1)
         self.last_movement_time = time.time()
         return "timeout_nudge"
 
