@@ -47,10 +47,28 @@ def draw_box(center, dimensions, rotation_euler):
     return lines
 
 
-def build_plot(uav_path, obstacles, offset, scale):
+def build_plot(uav_path, obstacles, offset, scale, flip_y=False):
+    """Construct the 3D plot of the UAV path and obstacles.
+
+    Parameters
+    ----------
+    uav_path : ndarray
+        Nx3 array of UAV positions.
+    obstacles : list
+        Parsed obstacle information from the JSON file.
+    offset : ndarray
+        Translation applied to the UAV path.
+    scale : float
+        Multiplier to scale the UAV path data.
+    flip_y : bool, optional
+        If True the Y axis of the UAV data is flipped before alignment.
+    """
+
     uav_scaled = uav_path * scale
-    uav_flipped = np.column_stack((uav_scaled[:, 0], -uav_scaled[:, 1], uav_scaled[:, 2]))
-    uav_aligned = uav_flipped + offset
+    if flip_y:
+        uav_scaled[:, 1] *= -1
+
+    uav_aligned = uav_scaled + offset
 
     path_trace = go.Scatter3d(
         x=uav_aligned[:, 0],
@@ -93,14 +111,19 @@ def main():
     parser.add_argument('--obstacles', default="analysis/obstacles.json", help="Path to obstacles JSON")
     parser.add_argument('--output', default="uav_debug_view.html", help="Output HTML file")
     parser.add_argument('--scale', type=float, default=1.0, help="Scale multiplier for UAV data")
+    parser.add_argument('--flip-y', action='store_true', help="Flip the Y axis when plotting")
+    parser.add_argument('--no-align', action='store_true', help="Skip start offset alignment")
     args = parser.parse_args()
 
     telemetry, *_ = load_telemetry(args.log)
     obstacles = load_obstacles(args.obstacles)
-    marker = find_alignment_marker(obstacles)
-    offset = compute_offset(telemetry[0], marker, scale=args.scale)
+    if args.no_align:
+        offset = np.zeros(3)
+    else:
+        marker = find_alignment_marker(obstacles)
+        offset = compute_offset(telemetry[0], marker, scale=args.scale)
 
-    fig = build_plot(telemetry, obstacles, offset, scale=args.scale)
+    fig = build_plot(telemetry, obstacles, offset, scale=args.scale, flip_y=args.flip_y)
     fig.write_html(args.output)
     print(f"✅ Visualization saved to {args.output}")
 
