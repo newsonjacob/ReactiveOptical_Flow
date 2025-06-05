@@ -7,17 +7,44 @@ from scipy.spatial.transform import Rotation as R
 
 
 def load_telemetry(log_path):
+    """Load UAV position data from a CSV log file.
+
+    Args:
+        log_path: Path to the telemetry ``.csv`` file.
+
+    Returns:
+        A tuple ``(data, x_col, y_col, z_col)`` where ``data`` is an ``Nx3``
+        array of positions and the remaining values are the column names used
+        for ``x``, ``y`` and ``z``.
+    """
     df = pd.read_csv(log_path)
     x_col, y_col, z_col = 'pos_x', 'pos_y', 'pos_z'
     return df[[x_col, y_col, z_col]].values, x_col, y_col, z_col
 
 
 def load_obstacles(obstacle_path):
+    """Read obstacle definitions from a JSON file.
+
+    Args:
+        obstacle_path: Path to the obstacle description ``.json`` file.
+
+    Returns:
+        A list of obstacle dictionaries describing the scene.
+    """
     with open(obstacle_path, 'r') as f:
         return json.load(f)
 
 
 def find_alignment_marker(obstacles, marker_name="PlayerStart_3"):
+    """Locate a reference object used to align the UAV path.
+
+    Args:
+        obstacles: Iterable of obstacle dictionaries.
+        marker_name: Name of the marker object to search for.
+
+    Returns:
+        Numpy array containing the marker's ``(x, y, z)`` position.
+    """
     for obj in obstacles:
         if obj['name'] == marker_name:
             return np.array(obj['location'])
@@ -25,10 +52,30 @@ def find_alignment_marker(obstacles, marker_name="PlayerStart_3"):
 
 
 def compute_offset(uav_start, marker_position, scale=1.0):
+    """Calculate how much to translate the UAV path for alignment.
+
+    Args:
+        uav_start: The first UAV position from the telemetry log.
+        marker_position: Position of the alignment marker in obstacle space.
+        scale: Multiplicative scale applied to the UAV data.
+
+    Returns:
+        ``(x, y, z)`` offset to add to the UAV coordinates.
+    """
     return marker_position - uav_start * scale
 
 
 def draw_box(center, dimensions, rotation_euler):
+    """Create line traces representing a 3‑D box.
+
+    Args:
+        center: The box center coordinates ``(x, y, z)``.
+        dimensions: Box side lengths ``(dx, dy, dz)``.
+        rotation_euler: Euler rotation applied to the box.
+
+    Returns:
+        A list of ``go.Scatter3d`` objects outlining the box edges.
+    """
     cx, cy, cz = center
     dx, dy, dz = [d / 2.0 for d in dimensions]
     corners = np.array([
@@ -48,6 +95,17 @@ def draw_box(center, dimensions, rotation_euler):
 
 
 def build_plot(uav_path, obstacles, offset, scale):
+    """Assemble a plotly visualization of the flight path and obstacles.
+
+    Args:
+        uav_path: ``Nx3`` array of UAV positions.
+        obstacles: List of obstacle dictionaries.
+        offset: Translation offset for aligning the UAV path.
+        scale: Scale multiplier applied to the UAV positions.
+
+    Returns:
+        A ``plotly.graph_objects.Figure`` containing the scene.
+    """
     uav_scaled = uav_path * scale
     uav_flipped = np.column_stack((uav_scaled[:, 0], -uav_scaled[:, 1], uav_scaled[:, 2]))
     uav_aligned = uav_flipped + offset
@@ -88,6 +146,11 @@ def build_plot(uav_path, obstacles, offset, scale):
 
 
 def main():
+    """CLI entry point for generating a flight visualization.
+
+    Returns:
+        None
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument('--log', required=True, help="Path to UAV flight log CSV")
     parser.add_argument('--obstacles', default="analysis/obstacles.json", help="Path to obstacles JSON")
