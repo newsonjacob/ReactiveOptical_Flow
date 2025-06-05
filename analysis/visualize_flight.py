@@ -8,13 +8,31 @@ from scipy.spatial.transform import Rotation as R
 
 def load_telemetry(log_path):
     df = pd.read_csv(log_path)
+    required = {'pos_x', 'pos_y', 'pos_z'}
+    missing = required - set(df.columns)
+    if missing:
+        cols = ', '.join(sorted(missing))
+        raise ValueError(f"Missing columns in telemetry file: {cols}")
+
     x_col, y_col, z_col = 'pos_x', 'pos_y', 'pos_z'
     return df[[x_col, y_col, z_col]].values, x_col, y_col, z_col
 
 
 def load_obstacles(obstacle_path):
     with open(obstacle_path, 'r') as f:
-        return json.load(f)
+        data = json.load(f)
+
+    if not isinstance(data, list):
+        raise ValueError("Obstacle data must be a list of objects")
+
+    required = {'name', 'location', 'dimensions', 'rotation'}
+    for idx, obj in enumerate(data):
+        missing = required - obj.keys()
+        if missing:
+            cols = ', '.join(sorted(missing))
+            raise ValueError(f"Obstacle index {idx} missing fields: {cols}")
+
+    return data
 
 
 def find_alignment_marker(obstacles, marker_name="PlayerStart_3"):
@@ -95,9 +113,23 @@ def main():
     parser.add_argument('--scale', type=float, default=1.0, help="Scale multiplier for UAV data")
     args = parser.parse_args()
 
-    telemetry, *_ = load_telemetry(args.log)
-    obstacles = load_obstacles(args.obstacles)
-    marker = find_alignment_marker(obstacles)
+    try:
+        telemetry, *_ = load_telemetry(args.log)
+    except Exception as e:
+        print(f"Error loading telemetry: {e}")
+        return
+
+    try:
+        obstacles = load_obstacles(args.obstacles)
+    except Exception as e:
+        print(f"Error loading obstacles: {e}")
+        return
+
+    try:
+        marker = find_alignment_marker(obstacles)
+    except Exception as e:
+        print(f"Error finding alignment marker: {e}")
+        return
     offset = compute_offset(telemetry[0], marker, scale=args.scale)
 
     fig = build_plot(telemetry, obstacles, offset, scale=args.scale)
