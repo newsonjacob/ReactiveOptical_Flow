@@ -1,9 +1,9 @@
 import pandas as pd
 import json
-import numpy as np
 import argparse
 import plotly.graph_objects as go
 from scipy.spatial.transform import Rotation as R
+import numpy as np  # exposed for tests
 
 
 def load_telemetry(log_path):
@@ -63,6 +63,8 @@ def find_alignment_marker(obstacles, marker_name="PlayerStart_3"):
     Returns:
         Numpy array containing the marker's ``(x, y, z)`` position.
     """
+    import numpy as np
+
     for obj in obstacles:
         if obj['name'] == marker_name:
             return np.array(obj['location'])
@@ -80,6 +82,8 @@ def compute_offset(uav_start, marker_position, scale=1.0):
     Returns:
         ``(x, y, z)`` offset to add to the UAV coordinates.
     """
+    import numpy as np
+
     return marker_position - uav_start * scale
 
 
@@ -94,6 +98,8 @@ def draw_box(center, dimensions, rotation_euler):
     Returns:
         A list of ``go.Scatter3d`` objects outlining the box edges.
     """
+    import numpy as np
+
     cx, cy, cz = center
     dx, dy, dz = [d / 2.0 for d in dimensions]
     corners = np.array([
@@ -124,7 +130,9 @@ def build_plot(uav_path, obstacles, offset, scale):
     Returns:
         A ``plotly.graph_objects.Figure`` containing the scene.
     """
-    uav_scaled = uav_path * scale
+    import numpy as np
+
+    uav_scaled = np.array(uav_path) * scale
     uav_flipped = np.column_stack((uav_scaled[:, 0], -uav_scaled[:, 1], uav_scaled[:, 2]))
     uav_aligned = uav_flipped + offset
 
@@ -140,16 +148,17 @@ def build_plot(uav_path, obstacles, offset, scale):
     box_lines = []
     for obs in obstacles:
         name = obs['name']
-        loc = np.array(obs['location'])
-        dims = np.array(obs['dimensions'])
+        loc = np.array(obs['location'], dtype=float)
+        dims = np.array(obs['dimensions'], dtype=float)
 
         if name.startswith("UCX_"):
             continue
-        if np.linalg.norm(loc) < 1.0:  # skip objects at origin
+        if float(np.sqrt(float((loc ** 2).sum()))) < 1.0:
+            # skip objects at origin
             continue
-        if np.max(dims) > 1000:  # skip huge boxes
+        if float(dims.max()) > 1000:
             continue
-        if np.any(dims > 200) and dims[1] > 100:  # skip large thin slices (likely floor/walls)
+        if bool((dims > 200).any()) and dims[1] > 100:
             continue
 
         box_lines.extend(draw_box(obs['location'], obs['dimensions'], obs['rotation']))
