@@ -68,6 +68,9 @@ def main():
     tracker = OpticalFlowTracker(lk_params, feature_params)
     flow_history = FlowHistory(size=5)
     navigator = Navigator(client)
+    from collections import deque
+    state_history = deque(maxlen=3)
+    pos_history = deque(maxlen=3)
 
     frame_count = 0
     start_time = time.time()
@@ -187,8 +190,9 @@ def main():
                     state_str = navigator.blind_forward()
             else:
                 pos, yaw, speed = get_drone_state(client)
-                brake_thres = 35 + 15 * speed
-                dodge_thres = 5 + 3 * speed
+                # Adaptive thresholds tuned for quicker reactions
+                brake_thres = 20 + 10 * speed
+                dodge_thres = 3 + 2 * speed
 
                 center_high = smooth_C > dodge_thres
                 side_diff = abs(smooth_L - smooth_R)
@@ -216,6 +220,20 @@ def main():
                     state_str = navigator.timeout_recover()
 
             param_refs['state'][0] = state_str
+
+            # === Detect repeated dodges with minimal progress ===
+            pos_hist, _, _ = get_drone_state(client)
+            state_history.append(state_str)
+            pos_history.append((pos_hist.x_val, pos_hist.y_val))
+            if len(state_history) == state_history.maxlen:
+                if all(s == state_history[-1] for s in state_history) and state_history[-1].startswith("dodge"):
+                    dx = pos_history[-1][0] - pos_history[0][0]
+                    dy = pos_history[-1][1] - pos_history[0][1]
+                    if abs(dx) < 0.5 and abs(dy) < 1.0:
+                        print("♻️ Repeated dodges detected — extending dodge")
+                        state_str = navigator.dodge(smooth_L, smooth_C, smooth_R, duration=3.0)
+                        state_history[-1] = state_str
+                        param_refs['state'][0] = state_str
 
             # === Reset logic from GUI ===
             if param_refs['reset_flag'][0]:

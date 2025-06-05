@@ -30,7 +30,7 @@ class Navigator:
         self.braked = True
         return "brake"
 
-    def dodge(self, smooth_L, smooth_C, smooth_R):
+    def dodge(self, smooth_L, smooth_C, smooth_R, duration: float = 2.0):
         """Perform a lateral dodge based on flow magnitudes.
 
         If the difference between left and right flow values is small but the
@@ -69,7 +69,7 @@ class Navigator:
             forward_speed,
             lateral * strength,
             0,
-            2.0
+            duration
         ).join()
 
         self.dodging = True
