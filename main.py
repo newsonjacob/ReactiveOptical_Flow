@@ -171,6 +171,7 @@ def main():
             responses = client.simGetImages([
                 ImageRequest("oakd_camera", ImageType.Scene, False, True)  # compress=True for JPEG
             ])
+            t_fetch_end = time.time()
             response = responses[0]
             if response.width == 0 or response.height == 0 or len(response.image_data_uint8) == 0:
                 print("⚠️ Invalid image frame — skipping visual processing")
@@ -197,7 +198,9 @@ def main():
 
             img1d = np.frombuffer(response.image_data_uint8, dtype=np.uint8)
             img = cv2.imdecode(img1d, cv2.IMREAD_COLOR)
-            t1 = time.time()
+            t_decode_end = time.time()
+            simgetimage_s = t_fetch_end - t0
+            decode_s = t_decode_end - t_fetch_end
             if img is None:
                 try:
                     frame_queue.put_nowait(last_vis_img)
@@ -412,7 +415,7 @@ def main():
                 f"{smooth_L:.3f},{smooth_C:.3f},{smooth_R:.3f},{flow_std:.3f},"
                 f"{pos.x_val:.2f},{pos.y_val:.2f},{pos.z_val:.2f},{yaw:.2f},{speed:.2f},{state_str},{collided},{obstacle_detected},{int(side_safe)},"
                 f"{brake_thres:.2f},{dodge_thres:.2f},{probe_req:.2f},{actual_fps:.2f},"
-                f"{t1-t0:.3f},{t1-t0:.3f},0.0,{loop_elapsed:.3f}\n"
+                f"{simgetimage_s:.3f},{decode_s:.3f},0.0,{loop_elapsed:.3f}\n"
             )
             if frame_count % LOG_INTERVAL == 0:
                 log_file.writelines(log_buffer)
