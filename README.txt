@@ -123,6 +123,18 @@ interactively.
 Only the five most recent `flight_view_*.html` files are retained in the
 `analysis/` directory. Older visualizations are removed automatically.
 
+## Flight Review
+
+For a combined summary and visualization refresh run:
+
+```bash
+python analysis/review_runs.py
+```
+
+This script iterates over `flow_logs/full_log_*.csv` files, generates any
+missing `flight_view_*.html` pages and writes `analysis/summary_report.txt`
+with basic statistics for each log.
+
 ## Future Improvements
 
 * Add SLAM integration
