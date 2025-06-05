@@ -100,6 +100,19 @@ The script scans `flow_logs/full_log_*.csv` and prints the frame count,
 how many frames registered a collision, and the straight‑line distance
 from the first to the last recorded position.
 
+## Flight Visualization
+
+`main.py` automatically generates a `flight_view_*.html` file inside the
+`analysis/` directory after each run. You can create or recreate the view
+manually with:
+
+```bash
+python analysis/visualize_flight.py --log flow_logs/full_log_XXXX.csv --output analysis/flight_view_XXXX.html
+```
+
+Open the resulting HTML file in your browser to explore the flight path
+interactively.
+
 ## Future Improvements
 
 * Add SLAM integration
