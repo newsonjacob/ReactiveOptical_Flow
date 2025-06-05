@@ -77,6 +77,7 @@ def main():
     frame_count = 0
     start_time = time.time()
     MAX_SIM_DURATION = 30  # seconds
+    LAND_TIMEOUT = 10  # max seconds to wait when landing
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     os.makedirs("flow_logs", exist_ok=True)
     log_file = open(f"flow_logs/full_log_{timestamp}.csv", 'w')
@@ -266,7 +267,7 @@ def main():
             if param_refs['reset_flag'][0]:
                 print("🔄 Resetting simulation...")
                 try:
-                    client.landAsync().join()
+                    client.landAsync(timeout_sec=LAND_TIMEOUT).join()
                     client.reset()
                     client.enableApiControl(True)
                     client.armDisarm(True)
@@ -351,7 +352,7 @@ def main():
         video_thread.join()
         out.release()
         try:
-            client.landAsync().join()
+            client.landAsync(timeout_sec=LAND_TIMEOUT).join()
             client.armDisarm(False)
             client.enableApiControl(False)
         except Exception as e:
