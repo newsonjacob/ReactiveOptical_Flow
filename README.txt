@@ -80,6 +80,24 @@ python batch_runs.py --count 3
 
 Omit `--count` to use the default of 5 runs.
 
+## Visualizing Flight Logs
+
+The `analysis/visualize_flight.py` script converts a CSV log and a set of
+obstacles into an interactive HTML view. You can optionally filter which
+obstacles are drawn:
+
+```bash
+python analysis/visualize_flight.py --log flow_logs/full_log_0001.csv \
+    --obstacles analysis/obstacles.json --output flight.html \
+    --show-ucx --show-huge
+```
+
+Flags:
+
+* `--show-ucx` – include objects whose names start with `UCX_`.
+* `--show-huge` – include very large bounding boxes.
+* `--show-flat` – include large thin slices such as floors or walls.
+
 ## Example Log Format
 
 ```

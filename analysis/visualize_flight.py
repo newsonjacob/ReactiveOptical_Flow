@@ -47,7 +47,8 @@ def draw_box(center, dimensions, rotation_euler):
     return lines
 
 
-def build_plot(uav_path, obstacles, offset, scale):
+def build_plot(uav_path, obstacles, offset, scale,
+               show_ucx=False, show_huge=False, show_flat=False):
     uav_scaled = uav_path * scale
     uav_flipped = np.column_stack((uav_scaled[:, 0], -uav_scaled[:, 1], uav_scaled[:, 2]))
     uav_aligned = uav_flipped + offset
@@ -67,13 +68,13 @@ def build_plot(uav_path, obstacles, offset, scale):
         loc = np.array(obs['location'])
         dims = np.array(obs['dimensions'])
 
-        if name.startswith("UCX_"):
+        if not show_ucx and name.startswith("UCX_"):
             continue
         if np.linalg.norm(loc) < 1.0:  # skip objects at origin
             continue
-        if np.max(dims) > 1000:  # skip huge boxes
+        if not show_huge and np.max(dims) > 1000:
             continue
-        if np.any(dims > 200) and dims[1] > 100:  # skip large thin slices (likely floor/walls)
+        if not show_flat and np.any(dims > 200) and dims[1] > 100:
             continue
 
         box_lines.extend(draw_box(obs['location'], obs['dimensions'], obs['rotation']))
@@ -93,6 +94,9 @@ def main():
     parser.add_argument('--obstacles', default="analysis/obstacles.json", help="Path to obstacles JSON")
     parser.add_argument('--output', default="uav_debug_view.html", help="Output HTML file")
     parser.add_argument('--scale', type=float, default=1.0, help="Scale multiplier for UAV data")
+    parser.add_argument('--show-ucx', action='store_true', help="Include obstacles with names starting with 'UCX_'")
+    parser.add_argument('--show-huge', action='store_true', help="Include very large obstacles")
+    parser.add_argument('--show-flat', action='store_true', help="Include large thin obstacles like floors or walls")
     args = parser.parse_args()
 
     telemetry, *_ = load_telemetry(args.log)
@@ -100,7 +104,15 @@ def main():
     marker = find_alignment_marker(obstacles)
     offset = compute_offset(telemetry[0], marker, scale=args.scale)
 
-    fig = build_plot(telemetry, obstacles, offset, scale=args.scale)
+    fig = build_plot(
+        telemetry,
+        obstacles,
+        offset,
+        scale=args.scale,
+        show_ucx=args.show_ucx,
+        show_huge=args.show_huge,
+        show_flat=args.show_flat,
+    )
     fig.write_html(args.output)
     print(f"✅ Visualization saved to {args.output}")
 
