@@ -126,15 +126,15 @@ Only the five most recent `flight_view_*.html` files are retained in the
 
 ## Flight Review
 
-For a combined summary and visualization refresh run:
+To review recent flights and refresh visualizations run:
 
 ```bash
-python analysis/review_runs.py
+python analysis/flight_review.py --limit 3
 ```
 
-This script iterates over `flow_logs/full_log_*.csv` files, generates any
-missing `flight_view_*.html` pages and writes `analysis/summary_report.txt`
-with basic statistics for each log.
+The command scans the latest `full_log_*.csv` files, ensures matching
+`flight_view_*.html` pages exist and prints a short text summary. A copy of
+the summary is saved as `analysis/flight_review_report.txt`.
 
 ## Future Improvements
 
