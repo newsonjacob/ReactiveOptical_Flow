@@ -1,5 +1,6 @@
 import sys
 import types
+import os
 import pytest
 # Replace potential numpy stub from conftest with the real package
 if "numpy" in sys.modules:
@@ -70,3 +71,33 @@ def test_find_alignment_marker_success_and_failure():
 
     with pytest.raises(ValueError):
         vis.find_alignment_marker([], marker_name="missing")
+
+
+def test_main_prunes_old_views(tmp_path, monkeypatch):
+    out_dir = tmp_path / "analysis"
+    out_dir.mkdir()
+
+    # create six dummy view files with varying mtimes
+    now = 1000000000
+    for i in range(6):
+        fp = out_dir / f"flight_view_{i}.html"
+        fp.write_text("x")
+        os.utime(fp, (now - i, now - i))
+
+    monkeypatch.setattr(vis, "load_telemetry", lambda p: (vis.np.array([[0, 0, 0]]), "x", "y", "z"))
+    monkeypatch.setattr(vis, "load_obstacles", lambda p: [])
+    monkeypatch.setattr(vis, "find_alignment_marker", lambda obs, marker_name="PlayerStart_3": vis.np.array([0, 0, 0]))
+    monkeypatch.setattr(vis, "compute_offset", lambda *a, **k: vis.np.array([0, 0, 0]))
+    fake_fig = types.SimpleNamespace(write_html=lambda p: open(p, "w").write(""))
+    monkeypatch.setattr(vis, "build_plot", lambda *a, **k: fake_fig)
+
+    argv = [
+        "prog", "--log", "dummy.csv", "--obstacles", "dummy.json",
+        "--output", str(out_dir / "flight_view_new.html")
+    ]
+    monkeypatch.setattr(sys, "argv", argv)
+
+    vis.main()
+
+    remaining = sorted(p.name for p in out_dir.glob("flight_view_*.html"))
+    assert len(remaining) == 5

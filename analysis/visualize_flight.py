@@ -3,7 +3,9 @@ import json
 import numpy as np
 import argparse
 import plotly.graph_objects as go
+import os
 from scipy.spatial.transform import Rotation as R
+from uav.utils import retain_recent_views
 
 
 def load_telemetry(log_path):
@@ -198,6 +200,7 @@ def main():
     fig = build_plot(telemetry, obstacles, offset, scale=args.scale)
     fig.write_html(args.output)
     print(f"✅ Visualization saved to {args.output}")
+    retain_recent_views(os.path.dirname(args.output))
 
 
 if __name__ == '__main__':
