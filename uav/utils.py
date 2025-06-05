@@ -53,3 +53,23 @@ def retain_recent_logs(log_dir: str, keep: int = 5) -> None:
             os.remove(old_log)
         except OSError:
             pass
+
+
+# === Optical Flow Helpers ===
+
+# Default fraction of the image height used for the "probe" region when
+# evaluating optical flow.  This matches the previous behaviour of using
+# the top third of the frame.
+DEFAULT_PROBE_HEIGHT = 1 / 3
+
+
+def compute_probe_mask(y_coords, height: int, fraction: float = DEFAULT_PROBE_HEIGHT):
+    """Return a boolean mask selecting coordinates within the probe region.
+
+    The mask spans ``fraction`` of the frame starting from the top.  ``y_coords``
+    can be any iterable of y pixel values.  The function avoids numpy
+    vectorisation so that tests work with the minimal numpy stub.
+    """
+
+    threshold = int(height * fraction + 0.5)
+    return np.array([float(y) < threshold for y in y_coords])

@@ -26,12 +26,23 @@ def main():
         default=ue4_default,
         help="Path to the Unreal Engine executable (or set UE4_PATH env variable)",
     )
+    parser.add_argument(
+        "--probe-height",
+        type=float,
+        default=float(DEFAULT_PROBE_HEIGHT),
+        help="Fraction of image height for the probe flow band",
+    )
     args = parser.parse_args()
 
     from uav.interface import exit_flag, start_gui
     from uav.perception import OpticalFlowTracker, FlowHistory
     from uav.navigation import Navigator
-    from uav.utils import get_drone_state, retain_recent_logs
+from uav.utils import (
+    get_drone_state,
+    retain_recent_logs,
+    compute_probe_mask,
+    DEFAULT_PROBE_HEIGHT,
+)
 
     # GUI parameter and status holders
     param_refs = {
@@ -175,8 +186,12 @@ def main():
             left_mag = np.mean(magnitudes[x_coords < w // 3]) if np.any(x_coords < w // 3) else 0
             center_band = (x_coords >= w // 3) & (x_coords < 2 * w // 3)
             right_mag = np.mean(magnitudes[x_coords >= 2 * w // 3]) if np.any(x_coords >= 2 * w // 3) else 0
-            probe_band = y_coords < h // 3
-            probe_mag = np.mean(magnitudes[center_band & probe_band]) if np.any(center_band & probe_band) else 0
+            probe_band = compute_probe_mask(y_coords, h, args.probe_height)
+            probe_mag = (
+                np.mean(magnitudes[center_band & probe_band])
+                if np.any(center_band & probe_band)
+                else 0
+            )
             center_mag = np.mean(magnitudes[center_band]) if np.any(center_band) else 0
 
             flow_history.update(left_mag, center_mag, right_mag)
