@@ -85,7 +85,7 @@ def main():
     log_file = open(f"flow_logs/full_log_{timestamp}.csv", 'w')
     log_file.write(
         "frame,time,features,flow_left,flow_center,flow_right,"
-        "flow_std,pos_x,pos_y,pos_z,yaw,speed,state,collided,"
+        "flow_std,pos_x,pos_y,pos_z,yaw,speed,state,collided,obstacle,"
         "brake_thres,dodge_thres,probe_req,fps,simgetimage_s,decode_s,processing_s,loop_s\n"
     )
     retain_recent_logs("flow_logs")
@@ -255,6 +255,8 @@ def main():
 
             param_refs['state'][0] = state_str
 
+            obstacle_detected = int('dodge' in state_str or state_str == 'brake')
+
             # === Detect repeated dodges with minimal progress ===
             pos_hist, _, _ = get_drone_state(client)
             state_history.append(state_str)
@@ -297,7 +299,7 @@ def main():
                 log_file = open(f"flow_logs/full_log_{timestamp}.csv", 'w')
                 log_file.write(
                     "frame,time,features,flow_left,flow_center,flow_right,"
-                    "flow_std,pos_x,pos_y,pos_z,yaw,speed,state,collided,"
+                    "flow_std,pos_x,pos_y,pos_z,yaw,speed,state,collided,obstacle,"
                     "brake_thres,dodge_thres,probe_req,fps,simgetimage_s,decode_s,processing_s,loop_s\n"
                 )
                 retain_recent_logs("flow_logs")
@@ -334,7 +336,7 @@ def main():
             log_buffer.append(
                 f"{frame_count},{time_now:.2f},{len(good_old)},"
                 f"{smooth_L:.3f},{smooth_C:.3f},{smooth_R:.3f},{flow_std:.3f},"
-                f"{pos.x_val:.2f},{pos.y_val:.2f},{pos.z_val:.2f},{yaw:.2f},{speed:.2f},{state_str},{collided},"
+                f"{pos.x_val:.2f},{pos.y_val:.2f},{pos.z_val:.2f},{yaw:.2f},{speed:.2f},{state_str},{collided},{obstacle_detected},"
                 f"{brake_thres:.2f},{dodge_thres:.2f},{probe_req:.2f},{actual_fps:.2f},"
                 f"{t1-t0:.3f},{t1-t0:.3f},0.0,{loop_elapsed:.3f}\n"
             )
