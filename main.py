@@ -130,18 +130,29 @@ def main():
             # Handle settle phase after dodge
             if navigator.settling:
                 if time_now < navigator.settle_end_time:
-                    if time_now > navigator.current_motion_until:
-                        print("⏳ Settling — reissuing slow forward creep")
-                        client.moveByVelocityAsync(0.3, 0, 0, duration=1)
-                        navigator.current_motion_until = time_now + 1.0
-                    state_str = "settling"
-                    param_refs['state'][0] = state_str
-                    obstacle_detected = 0
+                    ...
+                    # Log settle state
+                    pos, yaw, speed = get_drone_state(client)
+                    collision = client.simGetCollisionInfo()
+                    collided = int(getattr(collision, "has_collided", False))
+
+                    log_buffer.append(
+                        f"{frame_count},{time_now:.2f},0,0,0,0,0,"
+                        f"{pos.x_val:.2f},{pos.y_val:.2f},{pos.z_val:.2f},{yaw:.2f},{speed:.2f},settling,{collided},0,"
+                        f"0,0,0,0,0,0,0,{time.time() - loop_start:.3f}\n"
+                    )
+
+                    if frame_count % LOG_INTERVAL == 0:
+                        log_file.writelines(log_buffer)
+                        log_buffer.clear()
+
                     try:
                         frame_queue.put_nowait(vis_img)
                     except Exception:
                         pass
+
                     continue
+
                 else:
                     print("✅ Settle period over — resuming evaluation")
                     navigator.settling = False
@@ -162,10 +173,26 @@ def main():
             ])
             response = responses[0]
             if response.width == 0 or response.height == 0 or len(response.image_data_uint8) == 0:
+                print("⚠️ Invalid image frame — skipping visual processing")
+                pos, yaw, speed = get_drone_state(client)
+                collision = client.simGetCollisionInfo()
+                collided = int(getattr(collision, "has_collided", False))
+
+                log_buffer.append(
+                    f"{frame_count},{time_now:.2f},0,0,0,0,0,"
+                    f"{pos.x_val:.2f},{pos.y_val:.2f},{pos.z_val:.2f},{yaw:.2f},{speed:.2f},no_image,{collided},0,"
+                    f"0,0,0,0,0,0,0,{time.time() - loop_start:.3f}\n"
+                )
+
                 try:
                     frame_queue.put_nowait(last_vis_img)
                 except Exception:
                     pass
+
+                if frame_count % LOG_INTERVAL == 0:
+                    log_file.writelines(log_buffer)
+                    log_buffer.clear()
+
                 continue
 
             img1d = np.frombuffer(response.image_data_uint8, dtype=np.uint8)
