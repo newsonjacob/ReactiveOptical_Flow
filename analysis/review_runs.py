@@ -16,6 +16,7 @@ if __package__ is None:
     sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from analysis.summarize_runs import summarize_log
+from analysis.utils import retain_recent_views
 
 
 def ensure_visualization(log_path: str, html_path: str) -> None:
@@ -57,6 +58,7 @@ def main() -> None:
         html_name = f"flight_view_{timestamp}.html"
         html_path = os.path.join("analysis", html_name)
         ensure_visualization(path, html_path)
+        retain_recent_views("analysis")
 
     report_lines = ["log,frames,collisions,distance"]
     for path, frames, collisions, distance in results:
