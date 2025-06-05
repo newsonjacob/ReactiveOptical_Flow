@@ -2,10 +2,13 @@ import sys
 import types
 import pytest
 # Replace potential numpy stub from conftest with the real package
-if "numpy" in sys.modules:
+if "numpy" in sys.modules and getattr(sys.modules["numpy"], "__file__", None) is None:
     del sys.modules["numpy"]
-import numpy as real_numpy
-sys.modules["numpy"] = real_numpy
+if "numpy" in sys.modules:
+    real_numpy = sys.modules["numpy"]
+else:
+    import numpy as real_numpy
+    sys.modules["numpy"] = real_numpy
 
 # Provide minimal stubs if optional deps are missing
 if 'pandas' not in sys.modules:
