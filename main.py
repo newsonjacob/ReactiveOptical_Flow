@@ -221,13 +221,15 @@ def main():
             brake_thres = 0.0
             dodge_thres = 0.0
             probe_req = 0.0
-            if len(good_old) < 5:
+
+            if len(good_old) < 5: #If the number of "good" feature points tracked by the optical flow algorithm is less than 5, then...
                 if smooth_L > 1.5 and smooth_R > 1.5 and smooth_C < 0.2:
                     state_str = navigator.brake()
                 else:
                     state_str = navigator.blind_forward()
             else:
                 pos, yaw, speed = get_drone_state(client)
+
                 # Adaptive thresholds tuned for quicker reactions
                 brake_thres = 20 + 10 * speed
                 dodge_thres = 3 + 2 * speed
@@ -236,33 +238,51 @@ def main():
                 side_diff = abs(smooth_L - smooth_R)
                 side_safe = side_diff > 10 and (smooth_L < 100 or smooth_R < 100)
 
-                if smooth_C > brake_thres:
+                probe_reliable = probe_count > MIN_PROBE_FEATURES and probe_mag > 0.05
+                in_grace_period = time_now < navigator.grace_period_end_time
+
+                # === Priority 1: Severe brake override (ignores grace period)
+                if smooth_C > (brake_thres * 1.5):
                     state_str = navigator.brake()
-                elif probe_mag < 0.1 and center_mag > 0.7:
-                    print("⚠️ No probe flow but high center flow — possible wall ahead")
-                    state_str = navigator.brake()
-                # Try regular dodge if side difference exists
-                if center_high and side_safe:
-                    state_str = navigator.dodge(smooth_L, smooth_C, smooth_R)
-                # Fallback: high center flow and low probe => flat wall straight ahead
-                elif probe_mag < 0.5 and center_mag > 0.7:
-                    if should_flat_wall_dodge(center_mag, probe_mag, probe_count, MIN_PROBE_FEATURES, flow_std, FLOW_STD_MAX):
-                        print("🟥 Flat wall detected — attempting fallback dodge")
+                    navigator.grace_period_end_time = time_now + 2.5
+
+                elif not in_grace_period:
+                    # === Brake Logic
+                    if smooth_C > brake_thres:
+                        state_str = navigator.brake()
+                        navigator.grace_period_end_time = time_now + 2.5
+                    # elif not probe_reliable and center_mag > 0.7:
+                    #     print("⚠️ No probe flow but high center flow — possible wall ahead")
+                    #     state_str = navigator.brake()
+                    #     navigator.grace_period_end_time = time_now + 2.5
+
+                    # === Dodge Logic
+                    elif center_high and side_safe:
                         state_str = navigator.dodge(smooth_L, smooth_C, smooth_R)
-                    else:
-                        print("🔬 Insufficient probe features — ignoring fallback")
-                elif (navigator.braked or navigator.dodging) and smooth_C < 10 and smooth_L < 10 and smooth_R < 10:
-                    state_str = navigator.resume_forward()
-                elif not navigator.braked and not navigator.dodging and time_now - navigator.last_movement_time > 2:
-                    state_str = navigator.reinforce()
-                elif (navigator.braked or navigator.dodging) and speed < 0.2 and smooth_C < 5 and smooth_L < 5 and smooth_R < 5:
-                    state_str = navigator.nudge()
-                elif time_now - navigator.last_movement_time > 4:
-                    state_str = navigator.timeout_recover()
+                        navigator.grace_period_end_time = time_now + 2.5
+                    elif probe_mag < 0.5 and center_mag > 0.7:
+                        if should_flat_wall_dodge(center_mag, probe_mag, probe_count, MIN_PROBE_FEATURES, flow_std, FLOW_STD_MAX):
+                            print("🟥 Flat wall detected — attempting fallback dodge")
+                            state_str = navigator.dodge(smooth_L, smooth_C, smooth_R)
+                            navigator.grace_period_end_time = time_now + 2.5
+                        else:
+                            print("🔬 Insufficient probe features — ignoring fallback")
+
+                # === Recovery / Maintenance States (always allowed)
+                if state_str == "none":
+                    if (navigator.braked or navigator.dodging) and smooth_C < 10 and smooth_L < 10 and smooth_R < 10:
+                        state_str = navigator.resume_forward()
+                    elif not navigator.braked and not navigator.dodging and time_now - navigator.last_movement_time > 2:
+                        state_str = navigator.reinforce()
+                    elif (navigator.braked or navigator.dodging) and speed < 0.2 and smooth_C < 5 and smooth_L < 5 and smooth_R < 5:
+                        state_str = navigator.nudge()
+                    elif time_now - navigator.last_movement_time > 4:
+                        state_str = navigator.timeout_recover()
 
             param_refs['state'][0] = state_str
-
             obstacle_detected = int('dodge' in state_str or state_str == 'brake')
+
+
 
             # === Detect repeated dodges with minimal progress ===
             pos_hist, _, _ = get_drone_state(client)

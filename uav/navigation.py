@@ -12,6 +12,8 @@ class Navigator:
         self.braked = False
         self.dodging = False
         self.last_movement_time = time.time()
+        self.grace_period_end_time = 0  # ← Add this line
+
 
     def get_state(self):
         """Return the drone position, yaw angle and speed."""
@@ -31,38 +33,29 @@ class Navigator:
         return "brake"
 
     def dodge(self, smooth_L, smooth_C, smooth_R, duration: float = 2.0):
-        """Perform a lateral dodge based on flow magnitudes.
+        """Perform a lateral dodge based on flow magnitudes."""
+        print(f"🔍 Dodge Decision — L: {smooth_L:.1f}, C: {smooth_C:.1f}, R: {smooth_R:.1f}")
 
-        If the difference between left and right flow values is small but the
-        center flow is high, force a dodge toward the slightly safer side
-        instead of skipping.
-        """
-        if smooth_L + 10 < smooth_R:
+        left_safe = smooth_L < 0.8 * smooth_C
+        right_safe = smooth_R < 0.8 * smooth_C
+
+        if left_safe and not right_safe:
             direction = "left"
-        elif smooth_R + 10 < smooth_L:
+        elif right_safe and not left_safe:
             direction = "right"
-        elif smooth_C > 1.0:
-            # flat wall straight ahead – pick the lower flow side
+        elif left_safe and right_safe:
             direction = "left" if smooth_L <= smooth_R else "right"
-            print(f"⚠️ Ambiguous dodge -> forcing {direction}")
+            print(f"⚠️ Both sides okay — picking {direction}")
         else:
-            ratio = smooth_C / max(smooth_L, smooth_R) if max(smooth_L, smooth_R) > 0 else 0
-            if smooth_C > 1.5 and ratio > 0.75:
-                # flat wall straight ahead – pick the lower flow side
-                direction = "left" if smooth_L <= smooth_R else "right"
-                print(f"⚠️ Ambiguous dodge -> forcing {direction}")
-            else:
-                print("❌ Dodge ambiguous — skipping")
-                return "no_dodge"
+            direction = "left" if smooth_L <= smooth_R else "right"
+            print(f"⚠️ No safe sides — forcing {direction}")
 
         lateral = 1.0 if direction == "right" else -1.0
         strength = 0.5 if max(smooth_L, smooth_R) > 100 else 1.0
+        forward_speed = 0.0 if smooth_C > 1.0 else 0.3
 
         # Cut existing motion before dodge
-        self.client.moveByVelocityBodyFrameAsync(0, 0, 0, 0.2).join()  # brief stop
-
-        # Decide forward speed
-        forward_speed = 0.0 if smooth_C > 1.0 else 0.3
+        self.client.moveByVelocityBodyFrameAsync(0, 0, 0, 0.2).join()
 
         print(f"🔀 Dodging {direction} (strength {strength:.1f}, forward {forward_speed:.1f})")
         self.client.moveByVelocityBodyFrameAsync(
@@ -76,7 +69,6 @@ class Navigator:
         self.braked = False
         self.last_movement_time = time.time()
         return f"dodge_{direction}"
-
 
     def resume_forward(self):
         """Resume normal forward velocity."""
