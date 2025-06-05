@@ -31,7 +31,12 @@ def main():
     from uav.interface import exit_flag, start_gui
     from uav.perception import OpticalFlowTracker, FlowHistory
     from uav.navigation import Navigator
-    from uav.utils import get_drone_state, retain_recent_logs, should_flat_wall_dodge
+    from uav.utils import (
+        get_drone_state,
+        retain_recent_logs,
+        retain_recent_views,
+        should_flat_wall_dodge,
+    )
 
     # GUI parameter and status holders
     param_refs = {
@@ -371,6 +376,7 @@ def main():
                 "--output", html_output,
                 "--scale", "1.0"
             ])
+            retain_recent_views("analysis")
             print(f"✅ 3D visualisation saved to {html_output}")
         except Exception as e:
             print(f"⚠️ Visualization failed: {e}")
