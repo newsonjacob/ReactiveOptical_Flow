@@ -15,7 +15,7 @@ if "pandas" not in sys.modules:
 else:
     import pandas as pd
 import pytest
-from analysis.flight_review import parse_log, align_path
+from analysis.flight_review import parse_log, align_path, generate_report
 
 
 def test_parse_log_basic(tmp_path):
@@ -38,6 +38,7 @@ def test_parse_log_basic(tmp_path):
     assert stats['fps_avg'] == 20
     assert stats['loop_avg'] == pytest.approx(0.2)
     assert stats['states']['resume'] == 2
+    assert stats['repeats'] == {}
 
 
 def test_align_path_applies_offset():
@@ -52,3 +53,44 @@ def test_align_path_applies_offset():
     aligned = align_path(path, obstacles, scale=1.0)
     assert np.allclose(aligned[0], [5, 5, 0])
     assert np.allclose(aligned[1], [6, 4, 0])
+
+
+def test_parse_log_detects_repeated_states(tmp_path):
+    data = pd.DataFrame({
+        'pos_x': [0, 0, 0, 0],
+        'pos_y': [0, 0, 0, 0],
+        'pos_z': [0, 0, 0, 0],
+        'state': ['brake', 'brake', 'resume', 'resume'],
+    })
+    log_path = tmp_path / "log.csv"
+    data.to_csv(log_path, index=False)
+
+    stats = parse_log(str(log_path))
+    assert stats['repeats'] == {'brake': 2, 'resume': 2}
+
+
+def test_generate_report(monkeypatch, tmp_path):
+    log_path = tmp_path / 'full_log_test.csv'
+    df = pd.DataFrame({
+        'pos_x': [0, 1],
+        'pos_y': [0, 0],
+        'pos_z': [0, 0],
+        'state': ['resume', 'resume'],
+    })
+    df.to_csv(log_path, index=False)
+
+    obstacles = [{
+        'name': 'PlayerStart_3',
+        'location': [0, 0, 0],
+        'dimensions': [0, 0, 0],
+        'rotation': [0, 0, 0],
+    }]
+
+    telemetry = np.array([[0, 0, 0], [1, 0, 0]])
+
+    monkeypatch.setattr('analysis.visualize_flight.load_obstacles', lambda p: obstacles)
+    monkeypatch.setattr('analysis.visualize_flight.load_telemetry', lambda p: (telemetry, None, None, None))
+
+    report = generate_report([str(log_path)], obstacles_path='ignored')
+    assert 'frames=2' in report
+    assert 'repeats=resume:2' in report
