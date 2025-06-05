@@ -87,7 +87,7 @@ def main():
     log_file = open(f"flow_logs/full_log_{timestamp}.csv", 'w')
     log_file.write(
         "frame,time,features,flow_left,flow_center,flow_right,"
-        "flow_std,pos_x,pos_y,pos_z,yaw,speed,state,collided,obstacle,"
+        "flow_std,pos_x,pos_y,pos_z,yaw,speed,state,collided,obstacle,side_safe,"
         "brake_thres,dodge_thres,probe_req,fps,simgetimage_s,decode_s,processing_s,loop_s\n"
     )
     retain_recent_logs("flow_logs")
@@ -237,6 +237,7 @@ def main():
                 center_high = smooth_C > dodge_thres
                 side_diff = abs(smooth_L - smooth_R)
                 side_safe = side_diff > 10 and (smooth_L < 100 or smooth_R < 100)
+                side_safe_flag = int(side_safe)
 
                 probe_reliable = probe_count > MIN_PROBE_FEATURES and probe_mag > 0.05
                 in_grace_period = time_now < navigator.grace_period_end_time
@@ -326,7 +327,7 @@ def main():
                 log_file = open(f"flow_logs/full_log_{timestamp}.csv", 'w')
                 log_file.write(
                     "frame,time,features,flow_left,flow_center,flow_right,"
-                    "flow_std,pos_x,pos_y,pos_z,yaw,speed,state,collided,obstacle,"
+                    "flow_std,pos_x,pos_y,pos_z,yaw,speed,state,collided,obstacle,side_safe,"
                     "brake_thres,dodge_thres,probe_req,fps,simgetimage_s,decode_s,processing_s,loop_s\n"
                 )
                 retain_recent_logs("flow_logs")
@@ -363,7 +364,7 @@ def main():
             log_buffer.append(
                 f"{frame_count},{time_now:.2f},{len(good_old)},"
                 f"{smooth_L:.3f},{smooth_C:.3f},{smooth_R:.3f},{flow_std:.3f},"
-                f"{pos.x_val:.2f},{pos.y_val:.2f},{pos.z_val:.2f},{yaw:.2f},{speed:.2f},{state_str},{collided},{obstacle_detected},"
+                f"{pos.x_val:.2f},{pos.y_val:.2f},{pos.z_val:.2f},{yaw:.2f},{speed:.2f},{state_str},{collided},{obstacle_detected},{side_safe_flag},"
                 f"{brake_thres:.2f},{dodge_thres:.2f},{probe_req:.2f},{actual_fps:.2f},"
                 f"{t1-t0:.3f},{t1-t0:.3f},0.0,{loop_elapsed:.3f}\n"
             )
