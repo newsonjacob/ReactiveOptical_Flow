@@ -32,3 +32,8 @@ def test_should_flat_wall_dodge_threshold():
     # Not enough probe features -> should be False
     assert should_flat_wall_dodge(1.0, 0.2, 3, 5) is False
 
+
+def test_should_flat_wall_dodge_flow_std_limit():
+    # Excessive variance should disable the fallback dodge
+    assert should_flat_wall_dodge(1.0, 0.2, 5, 5, flow_std=50.0) is False
+

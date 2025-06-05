@@ -78,6 +78,7 @@ def main():
     start_time = time.time()
     MAX_SIM_DURATION = 60  # seconds
     MIN_PROBE_FEATURES = 5
+    FLOW_STD_MAX = 10.0
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     os.makedirs("flow_logs", exist_ok=True)
     log_file = open(f"flow_logs/full_log_{timestamp}.csv", 'w')
@@ -237,7 +238,7 @@ def main():
                     state_str = navigator.dodge(smooth_L, smooth_C, smooth_R)
                 # Fallback: high center flow and low probe => flat wall straight ahead
                 elif probe_mag < 0.5 and center_mag > 0.7:
-                    if should_flat_wall_dodge(center_mag, probe_mag, probe_count, MIN_PROBE_FEATURES):
+                    if should_flat_wall_dodge(center_mag, probe_mag, probe_count, MIN_PROBE_FEATURES, flow_std, FLOW_STD_MAX):
                         print("🟥 Flat wall detected — attempting fallback dodge")
                         state_str = navigator.dodge(smooth_L, smooth_C, smooth_R)
                     else:
