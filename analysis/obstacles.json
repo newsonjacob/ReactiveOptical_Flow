@@ -1,0 +1,1262 @@
+[
+  {
+    "name": "Cube",
+    "location": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "dimensions": [
+      2.0,
+      2.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "WorldInfo_0",
+    "location": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "dimensions": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Ground",
+    "location": [
+      0.0,
+      2.5,
+      1.0
+    ],
+    "dimensions": [
+      40000.0,
+      40000.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "UCX_Ground",
+    "location": [
+      0.0,
+      2.5,
+      1.0
+    ],
+    "dimensions": [
+      40000.0,
+      40000.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "AtmosphericFog_1",
+    "location": [
+      25.29,
+      -5.41,
+      10.24
+    ],
+    "dimensions": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "SkyShereBlueprint",
+    "location": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "dimensions": [
+      32768.0,
+      32768.0,
+      32768.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Ground_4",
+    "location": [
+      0.0,
+      82.5,
+      1.0
+    ],
+    "dimensions": [
+      40000.0,
+      40000.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "UCX_Ground_4",
+    "location": [
+      0.0,
+      82.5,
+      1.0
+    ],
+    "dimensions": [
+      40000.0,
+      40000.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Ground_5",
+    "location": [
+      80.0,
+      2.9,
+      1.0
+    ],
+    "dimensions": [
+      40000.0,
+      40000.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "UCX_Ground_5",
+    "location": [
+      80.0,
+      2.9,
+      1.0
+    ],
+    "dimensions": [
+      40000.0,
+      40000.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Ground_6",
+    "location": [
+      80.0,
+      82.5,
+      1.0
+    ],
+    "dimensions": [
+      40000.0,
+      40000.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "UCX_Ground_6",
+    "location": [
+      80.0,
+      82.5,
+      1.0
+    ],
+    "dimensions": [
+      40000.0,
+      40000.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "SphereReflectionCaptureCentre",
+    "location": [
+      37.84,
+      1.92,
+      13.44
+    ],
+    "dimensions": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "SphereReflectionCaptureLeft",
+    "location": [
+      38.54,
+      70.24,
+      13.44
+    ],
+    "dimensions": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "SphereReflectionCaptureRight",
+    "location": [
+      37.84,
+      -74.08,
+      13.44
+    ],
+    "dimensions": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "SkyLight_1",
+    "location": [
+      0.3,
+      -0.08,
+      0.2
+    ],
+    "dimensions": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "PlayerStart_3",
+    "location": [
+      53.9,
+      -42.8,
+      2.02
+    ],
+    "dimensions": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Cube9",
+    "location": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "dimensions": [
+      9.18,
+      1.0,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "UCX_Cube9",
+    "location": [
+      60.8,
+      -40.3,
+      4.26
+    ],
+    "dimensions": [
+      9.18,
+      1.0,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Cube10",
+    "location": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "dimensions": [
+      9.18,
+      1.0,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "UCX_Cube10",
+    "location": [
+      60.8,
+      -45.7,
+      4.26
+    ],
+    "dimensions": [
+      9.18,
+      1.0,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Ground_7",
+    "location": [
+      80.0,
+      82.5,
+      1.0
+    ],
+    "dimensions": [
+      40000.0,
+      40000.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "UCX_Ground_7",
+    "location": [
+      80.0,
+      82.5,
+      1.0
+    ],
+    "dimensions": [
+      40000.0,
+      40000.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Cube11",
+    "location": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "dimensions": [
+      0.52,
+      3.24,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "UCX_Cube11",
+    "location": [
+      72.6,
+      -43.0,
+      4.26
+    ],
+    "dimensions": [
+      3.24,
+      0.52,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      0.0,
+      -1.57
+    ]
+  },
+  {
+    "name": "Cube12",
+    "location": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "dimensions": [
+      9.18,
+      1.0,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "UCX_Cube12",
+    "location": [
+      75.0,
+      -34.4,
+      4.26
+    ],
+    "dimensions": [
+      9.18,
+      1.0,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Cube13",
+    "location": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "dimensions": [
+      9.18,
+      1.0,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "UCX_Cube13",
+    "location": [
+      75.0,
+      -51.7,
+      4.26
+    ],
+    "dimensions": [
+      9.18,
+      1.0,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Cube14",
+    "location": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "dimensions": [
+      0.52,
+      3.24,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "UCX_Cube14",
+    "location": [
+      79.9,
+      -36.5,
+      4.26
+    ],
+    "dimensions": [
+      3.24,
+      0.52,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      0.0,
+      -1.57
+    ]
+  },
+  {
+    "name": "Cube15",
+    "location": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "dimensions": [
+      0.52,
+      3.24,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "UCX_Cube15",
+    "location": [
+      79.9,
+      -49.6,
+      4.26
+    ],
+    "dimensions": [
+      3.24,
+      0.52,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      0.0,
+      -1.57
+    ]
+  },
+  {
+    "name": "FlyingExampleMap_C_0",
+    "location": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "dimensions": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "AbstractNavData-Default",
+    "location": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "dimensions": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "WorldInfo_0.001",
+    "location": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "dimensions": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Ground.001",
+    "location": [
+      0.0,
+      2.5,
+      1.0
+    ],
+    "dimensions": [
+      40000.0,
+      40000.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "UCX_Ground.001",
+    "location": [
+      0.0,
+      2.5,
+      1.0
+    ],
+    "dimensions": [
+      40000.0,
+      40000.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "AtmosphericFog_1.001",
+    "location": [
+      25.29,
+      -5.41,
+      10.24
+    ],
+    "dimensions": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "SkyShereBlueprint.001",
+    "location": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "dimensions": [
+      32768.0,
+      32768.0,
+      32768.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Ground_4.001",
+    "location": [
+      0.0,
+      82.5,
+      1.0
+    ],
+    "dimensions": [
+      40000.0,
+      40000.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "UCX_Ground_4.001",
+    "location": [
+      0.0,
+      82.5,
+      1.0
+    ],
+    "dimensions": [
+      40000.0,
+      40000.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Ground_5.001",
+    "location": [
+      80.0,
+      2.9,
+      1.0
+    ],
+    "dimensions": [
+      40000.0,
+      40000.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "UCX_Ground_5.001",
+    "location": [
+      80.0,
+      2.9,
+      1.0
+    ],
+    "dimensions": [
+      40000.0,
+      40000.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Ground_6.001",
+    "location": [
+      80.0,
+      82.5,
+      1.0
+    ],
+    "dimensions": [
+      40000.0,
+      40000.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "UCX_Ground_6.001",
+    "location": [
+      80.0,
+      82.5,
+      1.0
+    ],
+    "dimensions": [
+      40000.0,
+      40000.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "SphereReflectionCaptureCentre.001",
+    "location": [
+      37.84,
+      1.92,
+      13.44
+    ],
+    "dimensions": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "SphereReflectionCaptureLeft.001",
+    "location": [
+      38.54,
+      70.24,
+      13.44
+    ],
+    "dimensions": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "SphereReflectionCaptureRight.001",
+    "location": [
+      37.84,
+      -74.08,
+      13.44
+    ],
+    "dimensions": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "SkyLight_1.001",
+    "location": [
+      0.3,
+      -0.08,
+      0.2
+    ],
+    "dimensions": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "PlayerStart_3.001",
+    "location": [
+      53.9,
+      -42.8,
+      2.02
+    ],
+    "dimensions": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Cube9.001",
+    "location": [
+      60.8,
+      -40.3,
+      4.26
+    ],
+    "dimensions": [
+      9.18,
+      1.0,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "UCX_Cube9.001",
+    "location": [
+      60.8,
+      -40.3,
+      4.26
+    ],
+    "dimensions": [
+      9.18,
+      1.0,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Cube10.001",
+    "location": [
+      60.8,
+      -45.7,
+      4.26
+    ],
+    "dimensions": [
+      9.18,
+      1.0,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "UCX_Cube10.001",
+    "location": [
+      60.8,
+      -45.7,
+      4.26
+    ],
+    "dimensions": [
+      9.18,
+      1.0,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Ground_7.001",
+    "location": [
+      80.0,
+      82.5,
+      1.0
+    ],
+    "dimensions": [
+      40000.0,
+      40000.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "UCX_Ground_7.001",
+    "location": [
+      80.0,
+      82.5,
+      1.0
+    ],
+    "dimensions": [
+      40000.0,
+      40000.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Cube11.001",
+    "location": [
+      72.6,
+      -43.0,
+      4.26
+    ],
+    "dimensions": [
+      3.24,
+      0.52,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      0.0,
+      -1.57
+    ]
+  },
+  {
+    "name": "UCX_Cube11.001",
+    "location": [
+      72.6,
+      -43.0,
+      4.26
+    ],
+    "dimensions": [
+      3.24,
+      0.52,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      0.0,
+      -1.57
+    ]
+  },
+  {
+    "name": "Cube12.001",
+    "location": [
+      75.0,
+      -34.4,
+      4.26
+    ],
+    "dimensions": [
+      9.18,
+      1.0,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "UCX_Cube12.001",
+    "location": [
+      75.0,
+      -34.4,
+      4.26
+    ],
+    "dimensions": [
+      9.18,
+      1.0,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Cube13.001",
+    "location": [
+      75.0,
+      -51.7,
+      4.26
+    ],
+    "dimensions": [
+      9.18,
+      1.0,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "UCX_Cube13.001",
+    "location": [
+      75.0,
+      -51.7,
+      4.26
+    ],
+    "dimensions": [
+      9.18,
+      1.0,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Cube14.001",
+    "location": [
+      79.9,
+      -36.5,
+      4.26
+    ],
+    "dimensions": [
+      3.24,
+      0.52,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      0.0,
+      -1.57
+    ]
+  },
+  {
+    "name": "UCX_Cube14.001",
+    "location": [
+      79.9,
+      -36.5,
+      4.26
+    ],
+    "dimensions": [
+      3.24,
+      0.52,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      0.0,
+      -1.57
+    ]
+  },
+  {
+    "name": "Cube15.001",
+    "location": [
+      79.9,
+      -49.6,
+      4.26
+    ],
+    "dimensions": [
+      3.24,
+      0.52,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      0.0,
+      -1.57
+    ]
+  },
+  {
+    "name": "UCX_Cube15.001",
+    "location": [
+      79.9,
+      -49.6,
+      4.26
+    ],
+    "dimensions": [
+      3.24,
+      0.52,
+      14.31
+    ],
+    "rotation": [
+      0.0,
+      0.0,
+      -1.57
+    ]
+  },
+  {
+    "name": "AbstractNavData-Default.001",
+    "location": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "dimensions": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "FlyingExampleMap_C_0.001",
+    "location": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "dimensions": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation": [
+      0.0,
+      -0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Actor_1",
+    "location": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "dimensions": [
+      2.0,
+      2.0,
+      2.0
+    ],
+    "rotation": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  }
+]

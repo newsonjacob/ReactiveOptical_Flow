@@ -356,6 +356,19 @@ def main():
             client.enableApiControl(False)
         except Exception as e:
             print("Landing error:", e)
+        # === Auto-generate 3D flight visualisation ===
+        try:
+            html_output = f"analysis/flight_view_{timestamp}.html"
+            subprocess.run([
+                "python", "analysis/visualize_flight.py",
+                "--log", f"flow_logs/full_log_{timestamp}.csv",
+                "--obstacles", "analysis/obstacles.json",
+                "--output", html_output,
+                "--scale", "1.0"
+            ])
+            print(f"✅ 3D visualisation saved to {html_output}")
+        except Exception as e:
+            print(f"⚠️ Visualization failed: {e}")
 
         if sim_process:
             sim_process.terminate()
