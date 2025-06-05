@@ -34,7 +34,10 @@ def summarize_log(path: str) -> Tuple[int, int, float]:
     df = pd.read_csv(path)
 
     frames = len(df)
-    collisions = int((df.get("collided", 0) > 0).sum())
+    if "collided" in df.columns:
+        collisions = int((df["collided"] > 0).sum())
+    else:
+        collisions = 0
 
     start = df.loc[0, ["pos_x", "pos_y", "pos_z"]].to_numpy()
     end = df.loc[df.index[-1], ["pos_x", "pos_y", "pos_z"]].to_numpy()
