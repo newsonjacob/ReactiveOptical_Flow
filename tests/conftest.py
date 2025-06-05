@@ -28,11 +28,12 @@ def allclose(a, b, tol=1e-8):
 
 numpy_stub = types.SimpleNamespace(array=array, allclose=allclose)
 
-# Register stub if numpy is missing
-if 'numpy' not in sys.modules:
+# Register stub if numpy is not installed
+import importlib.util
+if importlib.util.find_spec('numpy') is None:
     sys.modules['numpy'] = numpy_stub
 # Minimal cv2 stub for environments without OpenCV
-if "cv2" not in sys.modules:
+if importlib.util.find_spec('cv2') is None:
     cv2_stub = types.SimpleNamespace(
         createCLAHE=lambda **kwargs: types.SimpleNamespace(apply=lambda img: img),
         goodFeaturesToTrack=lambda *a, **k: None,

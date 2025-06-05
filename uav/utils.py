@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 import airsim
 import os
+from analysis.utils import retain_recent_files
 
 # Maximum acceptable standard deviation of optical flow magnitudes. When the
 # measured value exceeds this threshold the flow is considered unreliable.
@@ -35,28 +36,9 @@ def get_drone_state(client):
 
 
 def retain_recent_logs(log_dir: str, keep: int = 5) -> None:
-    """Keep only the `keep` most recent log files in *log_dir*.
+    """Keep only the ``keep`` most recent ``.csv`` log files."""
 
-    Files are ordered by modification time. Older files beyond the
-    desired count are silently removed.
-    """
-
-    try:
-        logs = [
-            os.path.join(log_dir, f)
-            for f in os.listdir(log_dir)
-            if f.endswith(".csv")
-        ]
-    except FileNotFoundError:
-        return
-
-    logs.sort(key=os.path.getmtime, reverse=True)
-
-    for old_log in logs[keep:]:
-        try:
-            os.remove(old_log)
-        except OSError:
-            pass
+    retain_recent_files(log_dir, "*.csv", keep)
 
 
 def should_flat_wall_dodge(center_mag: float, probe_mag: float, probe_count: int,
