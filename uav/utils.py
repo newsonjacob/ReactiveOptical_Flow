@@ -53,3 +53,32 @@ def retain_recent_logs(log_dir: str, keep: int = 5) -> None:
             os.remove(old_log)
         except OSError:
             pass
+
+
+def retain_recent_views(analysis_dir: str, keep: int = 5) -> None:
+    """Remove old flight view HTML files leaving only the newest ``keep``.
+
+    Parameters
+    ----------
+    analysis_dir: str
+        Directory containing ``flight_view_*.html`` files.
+    keep: int, optional
+        Number of most recent files to keep. Defaults to 5.
+    """
+
+    try:
+        views = [
+            os.path.join(analysis_dir, f)
+            for f in os.listdir(analysis_dir)
+            if f.startswith("flight_view_") and f.endswith(".html")
+        ]
+    except FileNotFoundError:
+        return
+
+    views.sort(key=os.path.getmtime, reverse=True)
+
+    for old_view in views[keep:]:
+        try:
+            os.remove(old_view)
+        except OSError:
+            pass

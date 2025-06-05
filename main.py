@@ -31,7 +31,11 @@ def main():
     from uav.interface import exit_flag, start_gui
     from uav.perception import OpticalFlowTracker, FlowHistory
     from uav.navigation import Navigator
-    from uav.utils import get_drone_state, retain_recent_logs
+    from uav.utils import (
+        get_drone_state,
+        retain_recent_logs,
+        retain_recent_views,
+    )
 
     # GUI parameter and status holders
     param_refs = {
@@ -86,6 +90,7 @@ def main():
         "brake_thres,dodge_thres,probe_req,fps,simgetimage_s,decode_s,processing_s,loop_s\n"
     )
     retain_recent_logs("flow_logs")
+    retain_recent_views("analysis")
 
     # Video writer setup
     fourcc = cv2.VideoWriter_fourcc(*'MJPG')
@@ -294,6 +299,7 @@ def main():
                     "brake_thres,dodge_thres,probe_req,fps,simgetimage_s,decode_s,processing_s,loop_s\n"
                 )
                 retain_recent_logs("flow_logs")
+                retain_recent_views("analysis")
 
                 # === Reset video writer ===
                 frame_queue.put(None)
@@ -367,6 +373,7 @@ def main():
                 "--scale", "1.0"
             ])
             print(f"✅ 3D visualisation saved to {html_output}")
+            retain_recent_views("analysis")
         except Exception as e:
             print(f"⚠️ Visualization failed: {e}")
 
