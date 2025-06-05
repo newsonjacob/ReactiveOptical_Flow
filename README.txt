@@ -42,6 +42,7 @@ AirSimExperiments/
 * Python 3.8+
 * AirSim installed and configured
 * Python dependencies listed in `requirements.txt`
+* Additional packages: `pandas`, `plotly`, and `scipy`
 
 Install the Python packages with:
 

@@ -3,3 +3,6 @@ numpy
 airsim
 msgpack-rpc-python
 msgpack
+pandas
+plotly
+scipy
