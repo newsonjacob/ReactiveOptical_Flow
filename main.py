@@ -76,7 +76,7 @@ def main():
 
     frame_count = 0
     start_time = time.time()
-    MAX_SIM_DURATION = 30  # seconds
+    MAX_SIM_DURATION = 60  # seconds
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     os.makedirs("flow_logs", exist_ok=True)
     log_file = open(f"flow_logs/full_log_{timestamp}.csv", 'w')
