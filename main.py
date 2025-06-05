@@ -31,7 +31,7 @@ def main():
     from uav.interface import exit_flag, start_gui
     from uav.perception import OpticalFlowTracker, FlowHistory
     from uav.navigation import Navigator
-    from uav.utils import get_drone_state, retain_recent_logs
+    from uav.utils import get_drone_state, retain_recent_logs, should_flat_wall_dodge
 
     # GUI parameter and status holders
     param_refs = {
@@ -77,6 +77,7 @@ def main():
     frame_count = 0
     start_time = time.time()
     MAX_SIM_DURATION = 60  # seconds
+    MIN_PROBE_FEATURES = 5
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     os.makedirs("flow_logs", exist_ok=True)
     log_file = open(f"flow_logs/full_log_{timestamp}.csv", 'w')
@@ -177,6 +178,7 @@ def main():
             right_mag = np.mean(magnitudes[x_coords >= 2 * w // 3]) if np.any(x_coords >= 2 * w // 3) else 0
             probe_band = y_coords < h // 3
             probe_mag = np.mean(magnitudes[center_band & probe_band]) if np.any(center_band & probe_band) else 0
+            probe_count = int(np.sum(center_band & probe_band))
             center_mag = np.mean(magnitudes[center_band]) if np.any(center_band) else 0
 
             flow_history.update(left_mag, center_mag, right_mag)
@@ -235,8 +237,11 @@ def main():
                     state_str = navigator.dodge(smooth_L, smooth_C, smooth_R)
                 # Fallback: high center flow and low probe => flat wall straight ahead
                 elif probe_mag < 0.5 and center_mag > 0.7:
-                    print("🟥 Flat wall detected — attempting fallback dodge")
-                    state_str = navigator.dodge(smooth_L, smooth_C, smooth_R)
+                    if should_flat_wall_dodge(center_mag, probe_mag, probe_count, MIN_PROBE_FEATURES):
+                        print("🟥 Flat wall detected — attempting fallback dodge")
+                        state_str = navigator.dodge(smooth_L, smooth_C, smooth_R)
+                    else:
+                        print("🔬 Insufficient probe features — ignoring fallback")
                 elif (navigator.braked or navigator.dodging) and smooth_C < 10 and smooth_L < 10 and smooth_R < 10:
                     state_str = navigator.resume_forward()
                 elif not navigator.braked and not navigator.dodging and time_now - navigator.last_movement_time > 2:

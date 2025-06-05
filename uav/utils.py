@@ -53,3 +53,13 @@ def retain_recent_logs(log_dir: str, keep: int = 5) -> None:
             os.remove(old_log)
         except OSError:
             pass
+
+
+def should_flat_wall_dodge(center_mag: float, probe_mag: float, probe_count: int,
+                           min_probe_features: int = 5) -> bool:
+    """Return True when probe flow is low but has enough features to
+    confidently interpret a flat wall straight ahead."""
+
+    if probe_count < min_probe_features:
+        return False
+    return probe_mag < 0.5 and center_mag > 0.7
