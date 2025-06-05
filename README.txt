@@ -120,6 +120,9 @@ python analysis/visualize_flight.py --log flow_logs/full_log_XXXX.csv --output a
 Open the resulting HTML file in your browser to explore the flight path
 interactively.
 
+Only the five most recent `flight_view_*.html` files are retained in the
+`analysis/` directory. Older visualizations are removed automatically.
+
 ## Future Improvements
 
 * Add SLAM integration
