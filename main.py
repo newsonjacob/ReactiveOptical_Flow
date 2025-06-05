@@ -66,7 +66,7 @@ def main():
                      criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
 
     tracker = OpticalFlowTracker(lk_params, feature_params)
-    flow_history = FlowHistory(size=5)
+    flow_history = FlowHistory()
     navigator = Navigator(client)
     from collections import deque
     state_history = deque(maxlen=3)
@@ -249,7 +249,7 @@ def main():
                     print("Reset error:", e)
 
                 tracker.initialize(gray)
-                flow_history = FlowHistory(size=5)
+                flow_history = FlowHistory()
                 navigator = Navigator(client)
                 frame_count = 0
                 param_refs['reset_flag'][0] = False
