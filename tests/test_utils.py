@@ -1,7 +1,7 @@
 import os
 import time
 from uav.utils import retain_recent_logs, should_flat_wall_dodge
-from analysis.utils import retain_recent_views
+from analysis.utils import retain_recent_views, retain_recent_files
 
 
 def test_retain_recent_logs_keeps_latest(tmp_path):
@@ -58,5 +58,27 @@ def test_retain_recent_views_keeps_latest(tmp_path):
 def test_retain_recent_views_missing_dir(tmp_path):
     missing = tmp_path / "missing"
     retain_recent_views(str(missing), keep=5)
+    assert not missing.exists()
+
+
+def test_retain_recent_files_keeps_latest(tmp_path):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+
+    now = time.time()
+    for i in range(4):
+        p = data_dir / f"file_{i}.txt"
+        p.write_text("data")
+        mod_time = now - i
+        os.utime(p, (mod_time, mod_time))
+
+    retain_recent_files(str(data_dir), "*.txt", keep=2)
+    remaining = sorted(f.name for f in data_dir.iterdir())
+    assert remaining == ["file_0.txt", "file_1.txt"]
+
+
+def test_retain_recent_files_missing_dir(tmp_path):
+    missing = tmp_path / "none"
+    retain_recent_files(str(missing), "*.txt", keep=2)
     assert not missing.exists()
 
