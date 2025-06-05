@@ -1,6 +1,6 @@
 import os
 import time
-from uav.utils import retain_recent_logs
+from uav.utils import retain_recent_logs, should_flat_wall_dodge
 
 
 def test_retain_recent_logs_keeps_latest(tmp_path):
@@ -25,4 +25,10 @@ def test_retain_recent_logs_missing_dir(tmp_path):
     missing = tmp_path / "missing"
     retain_recent_logs(str(missing), keep=3)
     assert not missing.exists()
+
+
+def test_should_flat_wall_dodge_threshold():
+    assert should_flat_wall_dodge(1.0, 0.2, 5, 5) is True
+    # Not enough probe features -> should be False
+    assert should_flat_wall_dodge(1.0, 0.2, 3, 5) is False
 
