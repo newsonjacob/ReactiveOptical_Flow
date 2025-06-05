@@ -21,7 +21,7 @@ AirSimExperiments/
 │   ├── navigation.py     # Obstacle avoidance and motion logic
 │   └── interface.py      # Tkinter GUI displaying flow data and STOP
 ├── flow_logs/            # Output directory for log files
-└── README.md             # You're here!
+└── README.txt             # You're here!
 ```
 
 ## How It Works
