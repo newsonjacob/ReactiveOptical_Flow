@@ -8,6 +8,8 @@ import subprocess
 import math
 from airsim import ImageRequest, ImageType
 import argparse
+from queue import Queue
+from threading import Thread
 
 # Default path to the Unreal Engine simulator used during development
 DEFAULT_UE4_PATH = r"C:\Users\newso\Documents\AirSimExperiments\BlocksBuild\WindowsNoEditor\Blocks\Binaries\Win64\Blocks.exe"
@@ -89,6 +91,24 @@ def main():
     fourcc = cv2.VideoWriter_fourcc(*'MJPG')
     out = cv2.VideoWriter('flow_output.avi', fourcc, 8.0, (640, 480))
 
+    # Offload video writing to a background thread
+    frame_queue: Queue = Queue(maxsize=20)
+
+    def video_worker() -> None:
+        while not exit_flag.is_set() or not frame_queue.empty():
+            frame = frame_queue.get()
+            if frame is None:
+                break
+            out.write(frame)
+            frame_queue.task_done()
+
+    video_thread = Thread(target=video_worker, daemon=True)
+    video_thread.start()
+
+    # Buffer log lines to throttle disk writes
+    log_buffer = []
+    LOG_INTERVAL = 5  # flush every 5 frames
+
     last_vis_img = np.zeros((480, 640, 3), dtype=np.uint8)  # Black frame as fallback
 
     target_fps = 20
@@ -98,9 +118,9 @@ def main():
     img = None  # Add this before your main loop
 
     try:
+        loop_start = time.time()
         while not exit_flag.is_set():
             frame_count += 1
-            loop_start = time.time()
             time_now = time.time()  # <-- Add this line
             if time_now - start_time >= MAX_SIM_DURATION:
                 print("⏱️ Time limit reached — landing and stopping.")
@@ -113,14 +133,20 @@ def main():
             ])
             response = responses[0]
             if response.width == 0 or response.height == 0 or len(response.image_data_uint8) == 0:
-                out.write(last_vis_img)
+                try:
+                    frame_queue.put_nowait(last_vis_img)
+                except Exception:
+                    pass
                 continue
 
             img1d = np.frombuffer(response.image_data_uint8, dtype=np.uint8)
             img = cv2.imdecode(img1d, cv2.IMREAD_COLOR)
             t1 = time.time()
             if img is None:
-                out.write(last_vis_img)
+                try:
+                    frame_queue.put_nowait(last_vis_img)
+                except Exception:
+                    pass
                 continue
 
             img = cv2.resize(img, (640, 480))
@@ -131,6 +157,7 @@ def main():
             if frame_count == 1:
                 tracker.initialize(gray)
                 print("Initialized optical flow tracker.")
+                frame_queue.put(vis_img)
                 continue
 
             if args.manual_nudge and frame_count == 5:
@@ -255,6 +282,9 @@ def main():
                 param_refs['reset_flag'][0] = False
 
                 # === Reset log file ===
+                if log_buffer:
+                    log_file.writelines(log_buffer)
+                    log_buffer.clear()
                 log_file.close()
                 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                 log_file = open(f"flow_logs/full_log_{timestamp}.csv", 'w')
@@ -266,31 +296,44 @@ def main():
                 retain_recent_logs("flow_logs")
 
                 # === Reset video writer ===
+                frame_queue.put(None)
+                video_thread.join()
                 out.release()
                 out = cv2.VideoWriter('flow_output.avi', fourcc, 8.0, (640, 480))
+                video_thread = Thread(target=video_worker, daemon=True)
+                video_thread.start()
                 continue
 
-            out.write(vis_img)
+            # Queue frame for async video writing
+            try:
+                frame_queue.put_nowait(vis_img)
+            except Exception:
+                pass
 
             # Throttle loop to target FPS
-            elapsed = time.time() - time_now
+            elapsed = time.time() - loop_start
             if elapsed < frame_duration:
                 time.sleep(frame_duration - elapsed)
+            loop_elapsed = time.time() - loop_start
+            actual_fps = 1 / max(loop_elapsed, 1e-6)
+            loop_start = time.time()
 
-            actual_fps = 1 / (time.time() - loop_start)
             fps_list.append(actual_fps)
 
             pos, yaw, speed = get_drone_state(client)
             collision = client.simGetCollisionInfo()
             collided = int(getattr(collision, "has_collided", False))
 
-            log_file.write(
+            log_buffer.append(
                 f"{frame_count},{time_now:.2f},{len(good_old)},"
                 f"{smooth_L:.3f},{smooth_C:.3f},{smooth_R:.3f},{flow_std:.3f},"
                 f"{pos.x_val:.2f},{pos.y_val:.2f},{pos.z_val:.2f},{yaw:.2f},{speed:.2f},{state_str},{collided},"
                 f"{brake_thres:.2f},{dodge_thres:.2f},{probe_req:.2f},{actual_fps:.2f},"
-                f"{t1-t0:.3f},{t1-t0:.3f},0.0,{time.time()-loop_start:.3f}\n"
+                f"{t1-t0:.3f},{t1-t0:.3f},0.0,{loop_elapsed:.3f}\n"
             )
+            if frame_count % LOG_INTERVAL == 0:
+                log_file.writelines(log_buffer)
+                log_buffer.clear()
 
             print(f"Actual FPS: {actual_fps:.2f}")
             print(f"Features detected: {len(good_old)}")
@@ -300,7 +343,12 @@ def main():
 
     finally:
         print("Landing...")
+        if log_buffer:
+            log_file.writelines(log_buffer)
+            log_buffer.clear()
         log_file.close()
+        frame_queue.put(None)
+        video_thread.join()
         out.release()
         try:
             client.landAsync().join()
