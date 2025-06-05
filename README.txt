@@ -88,6 +88,18 @@ frame,time,features,flow_left,flow_center,flow_right,flow_std,pos_x,pos_y,pos_z,
 1,0.05,120,3.2,1.1,2.0,0.8,0.12,0.00,-2.00,0.0,1.7,resume,0,50.0,8.0,20.0,18.5
 ```
 
+## Summarizing Runs
+
+Gather quick statistics about each run with:
+
+```bash
+python analysis/summarize_runs.py
+```
+
+The script scans `flow_logs/full_log_*.csv` and prints the frame count,
+how many frames registered a collision, and the straight‑line distance
+from the first to the last recorded position.
+
 ## Future Improvements
 
 * Add SLAM integration
