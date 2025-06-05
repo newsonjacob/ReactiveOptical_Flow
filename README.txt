@@ -88,6 +88,13 @@ frame,time,features,flow_left,flow_center,flow_right,flow_std,pos_x,pos_y,pos_z,
 1,0.05,120,3.2,1.1,2.0,0.8,0.12,0.00,-2.00,0.0,1.7,resume,0,50.0,8.0,20.0,18.5
 ```
 
+## Parameters
+
+`FLOW_STD_MAX` controls the maximum tolerated variance of optical flow
+magnitudes. When the standard deviation reported by the tracker exceeds
+this threshold the probe-based fallback dodge logic is skipped because
+the motion estimate is unreliable. The default value is `10.0`.
+
 ## Summarizing Runs
 
 Gather quick statistics about each run with:
