@@ -30,7 +30,7 @@ def main():
 
     from uav.interface import exit_flag, start_gui
     from uav.perception import OpticalFlowTracker, FlowHistory
-    from uav.navigation import Navigator
+    from uav.navigation import Navigator, should_fallback
     from uav.utils import get_drone_state, retain_recent_logs
 
     # GUI parameter and status holders
@@ -234,7 +234,7 @@ def main():
                 if center_high and side_safe:
                     state_str = navigator.dodge(smooth_L, smooth_C, smooth_R)
                 # Fallback: high center flow and low probe => flat wall straight ahead
-                elif probe_mag < 0.5 and center_mag > 0.7:
+                elif should_fallback(probe_mag, center_mag, flow_std):
                     print("🟥 Flat wall detected — attempting fallback dodge")
                     state_str = navigator.dodge(smooth_L, smooth_C, smooth_R)
                 elif (navigator.braked or navigator.dodging) and smooth_C < 10 and smooth_L < 10 and smooth_R < 10:

@@ -71,6 +71,12 @@ pytest
 
 3. The GUI displays the STOP button along with left/center/right flow values and the current state. Click STOP to end the simulation cleanly.
 
+## Configuration Parameters
+
+* `FLOW_STD_MAX` – maximum allowed standard deviation of optical flow
+  magnitudes before the probe based fallback dodge is suppressed. The
+  default value is `20.0`.
+
 ## Batch Runs
 
 Execute multiple runs back to back using `batch_runs.py`:

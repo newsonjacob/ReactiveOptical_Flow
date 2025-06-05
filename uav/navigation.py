@@ -4,6 +4,15 @@ import time
 import math
 import airsim
 
+# Maximum standard deviation of optical flow magnitudes considered reliable
+FLOW_STD_MAX = 20.0
+
+
+def should_fallback(probe_mag: float, center_mag: float, flow_std: float,
+                    threshold: float = FLOW_STD_MAX) -> bool:
+    """Return ``True`` if fallback dodge logic should be used."""
+    return probe_mag < 0.5 and center_mag > 0.7 and flow_std <= threshold
+
 class Navigator:
     """Issue high level movement commands and track state."""
     def __init__(self, client):

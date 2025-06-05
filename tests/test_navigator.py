@@ -1,6 +1,7 @@
 import unittest.mock as mock
 from tests.conftest import airsim_stub
 
+import uav.navigation as navigation
 from uav.navigation import Navigator
 
 
@@ -121,3 +122,10 @@ def test_reinforce_updates_time_and_calls():
     assert args[:3] == (2, 0, 0)
     assert kwargs.get('duration') == 3
     assert kwargs.get('drivetrain') == airsim_stub.DrivetrainType.ForwardOnly
+
+
+def test_should_fallback_respects_flow_std_threshold():
+    below = navigation.should_fallback(0.4, 1.0, navigation.FLOW_STD_MAX - 1)
+    above = navigation.should_fallback(0.4, 1.0, navigation.FLOW_STD_MAX + 1)
+    assert below is True
+    assert above is False
