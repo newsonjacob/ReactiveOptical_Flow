@@ -78,6 +78,8 @@ def main():
     frame_count = 0
     start_time = time.time()
     MAX_SIM_DURATION = 60  # seconds
+    GOAL_X = 25.5  # distance from start in AirSim coordinates
+    GOAL_RADIUS = 1.0  # meters
     MIN_PROBE_FEATURES = 5
     FLOW_STD_MAX = 10.0
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -127,6 +129,11 @@ def main():
             time_now = time.time()  # <-- Add this line
             if time_now - start_time >= MAX_SIM_DURATION:
                 print("⏱️ Time limit reached — landing and stopping.")
+                break
+
+            pos_goal, _, _ = get_drone_state(client)
+            if pos_goal.x_val >= GOAL_X - GOAL_RADIUS:
+                print("\U0001F3C1 Goal reached — landing.")
                 break
 
             # --- Get image from AirSim ---
