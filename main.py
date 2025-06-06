@@ -24,17 +24,6 @@ def main():
 
     from uav import DroneController, exit_flag, start_gui
 
-    # GUI parameter and status holders
-    param_refs = {
-        'L': [0.0],
-        'C': [0.0],
-        'R': [0.0],
-        'state': [''],
-        'reset_flag': [False]
-    }
-
-    start_gui(param_refs)
-
     # === LAUNCH UE4 SIMULATION ===
     ue4_exe = args.ue4_path
     try:
@@ -60,6 +49,7 @@ def main():
 
     controller = DroneController(client)
     controller.initialize(lk_params, feature_params)
+    start_gui(controller.param_refs)
     try:
         controller.run()
     except KeyboardInterrupt:
