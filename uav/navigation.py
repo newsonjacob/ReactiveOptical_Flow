@@ -4,6 +4,7 @@ import time
 import math
 import airsim
 
+
 class Navigator:
     """Issue high level movement commands and track state."""
     def __init__(self, client):
@@ -33,7 +34,10 @@ class Navigator:
         return "brake"
 
     def dodge(self, smooth_L, smooth_C, smooth_R, duration: float = 2.0):
-        print(f"🔍 Dodge Decision — L: {smooth_L:.1f}, C: {smooth_C:.1f}, R: {smooth_R:.1f}")
+        print(
+            f"🔍 Dodge Decision — L: {smooth_L:.1f}, "
+            f"C: {smooth_C:.1f}, R: {smooth_R:.1f}"
+        )
 
         left_safe = smooth_L < 0.8 * smooth_C
         right_safe = smooth_R < 0.8 * smooth_C
@@ -56,7 +60,10 @@ class Navigator:
         # Stop briefly
         self.client.moveByVelocityBodyFrameAsync(0, 0, 0, 0.2).join()
 
-        print(f"🔀 Dodging {direction} (strength {strength:.1f}, forward {forward_speed:.1f})")
+        print(
+            f"🔀 Dodging {direction} (strength {strength:.1f}, "
+            f"forward {forward_speed:.1f})"
+        )
         self.client.moveByVelocityBodyFrameAsync(
             forward_speed,
             lateral * strength,
@@ -74,9 +81,14 @@ class Navigator:
     def resume_forward(self):
         """Resume normal forward velocity."""
         print("✅ Resuming forward motion")
-        self.client.moveByVelocityAsync(2, 0, 0, duration=3,
+        self.client.moveByVelocityAsync(
+            2,
+            0,
+            0,
+            duration=3,
             drivetrain=airsim.DrivetrainType.ForwardOnly,
-            yaw_mode=airsim.YawMode(False, 0)).join()
+            yaw_mode=airsim.YawMode(False, 0),
+        ).join()
         self.braked = False
         self.dodging = False
         self.last_movement_time = time.time()
@@ -85,9 +97,14 @@ class Navigator:
     def blind_forward(self):
         """Move forward when no features are detected."""
         print("⚠️ No features — continuing blind forward motion")
-        self.client.moveByVelocityAsync(2, 0, 0, duration=2,
+        self.client.moveByVelocityAsync(
+            2,
+            0,
+            0,
+            duration=2,
             drivetrain=airsim.DrivetrainType.ForwardOnly,
-            yaw_mode=airsim.YawMode(False, 0)).join()
+            yaw_mode=airsim.YawMode(False, 0),
+        ).join()
         self.last_movement_time = time.time()
         return "blind_forward"
 
@@ -101,9 +118,14 @@ class Navigator:
     def reinforce(self):
         """Reissue the forward command to reinforce motion."""
         print("🔁 Reinforcing forward motion")
-        self.client.moveByVelocityAsync(2, 0, 0, duration=3,
+        self.client.moveByVelocityAsync(
+            2,
+            0,
+            0,
+            duration=3,
             drivetrain=airsim.DrivetrainType.ForwardOnly,
-            yaw_mode=airsim.YawMode(False, 0)).join()
+            yaw_mode=airsim.YawMode(False, 0),
+        ).join()
         self.last_movement_time = time.time()
         return "resume_reinforce"
 
@@ -113,4 +135,3 @@ class Navigator:
         self.client.moveByVelocityAsync(0.5, 0, 0, 1).join()
         self.last_movement_time = time.time()
         return "timeout_nudge"
-

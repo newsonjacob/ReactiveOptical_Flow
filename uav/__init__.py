@@ -16,4 +16,3 @@ __all__ = [
     "get_speed",
     "get_drone_state",
 ]
-

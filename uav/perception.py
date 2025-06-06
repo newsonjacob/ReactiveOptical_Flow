@@ -10,6 +10,7 @@ from typing import Deque, Dict, Optional, Tuple
 import cv2
 import numpy as np
 
+
 class FlowHistory:
     """Maintain a rolling window of recent flow magnitudes."""
 
@@ -45,6 +46,7 @@ class FlowHistory:
         arr = np.array(self.window)
         return tuple(arr.mean(axis=0))
 
+
 class OpticalFlowTracker:
     """Track sparse optical flow features between frames."""
 
@@ -68,10 +70,18 @@ class OpticalFlowTracker:
             gray_frame: Grayscale image used to seed the tracker.
         """
         self.prev_gray = gray_frame
-        self.prev_pts = cv2.goodFeaturesToTrack(gray_frame, mask=None, **self.feature_params)
+        self.prev_pts = cv2.goodFeaturesToTrack(
+            gray_frame,
+            mask=None,
+            **self.feature_params,
+        )
         self.prev_time = time.time()
 
-    def process_frame(self, gray: np.ndarray, _unused_start_time: float) -> Tuple[np.ndarray, np.ndarray, float]:  # ignore external time
+    def process_frame(
+        self,
+        gray: np.ndarray,
+        _unused_start_time: float,
+    ) -> Tuple[np.ndarray, np.ndarray, float]:  # ignore external time
         """Track features in ``gray`` and return motion information.
 
         Args:
@@ -80,14 +90,20 @@ class OpticalFlowTracker:
 
         Returns:
             A tuple ``(points, vectors, std)`` where ``points`` are the source
-            feature locations, ``vectors`` are the motion vectors between frames
-            and ``std`` is the standard deviation of their magnitudes.
+            feature locations, ``vectors`` are the motion vectors between
+            frames and ``std`` is the standard deviation of their magnitudes.
         """
         if self.prev_gray is None or self.prev_pts is None:
             self.initialize(gray)
             return np.array([]), np.array([]), 0.0
 
-        next_pts, status, err = cv2.calcOpticalFlowPyrLK(self.prev_gray, gray, self.prev_pts, None, **self.lk_params)
+        next_pts, status, err = cv2.calcOpticalFlowPyrLK(
+            self.prev_gray,
+            gray,
+            self.prev_pts,
+            None,
+            **self.lk_params,
+        )
 
         if next_pts is None or status is None:
             self.initialize(gray)
@@ -101,7 +117,11 @@ class OpticalFlowTracker:
         self.prev_time = current_time
 
         self.prev_gray = gray
-        self.prev_pts = cv2.goodFeaturesToTrack(gray, mask=None, **self.feature_params)
+        self.prev_pts = cv2.goodFeaturesToTrack(
+            gray,
+            mask=None,
+            **self.feature_params,
+        )
 
         if len(good_old) == 0:
             return np.array([]), np.array([]), 0.0
@@ -111,5 +131,3 @@ class OpticalFlowTracker:
         flow_std = np.std(magnitudes)
 
         return good_old, flow_vectors, flow_std
-
-

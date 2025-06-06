@@ -4,25 +4,28 @@ import math
 import cv2
 import numpy as np
 import airsim
-import os
 from analysis.utils import retain_recent_files
 
 # Maximum acceptable standard deviation of optical flow magnitudes. When the
 # measured value exceeds this threshold the flow is considered unreliable.
 FLOW_STD_MAX = 10.0
 
+
 def apply_clahe(gray_image):
     """Improve contrast of a grayscale image using CLAHE."""
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     return clahe.apply(gray_image)
 
+
 def get_yaw(orientation):
     """Return yaw angle in degrees from an AirSim quaternion."""
     return math.degrees(airsim.to_eularian_angles(orientation)[2])
 
+
 def get_speed(velocity):
     """Compute the speed magnitude of a velocity vector."""
     return np.linalg.norm([velocity.x_val, velocity.y_val, velocity.z_val])
+
 
 def get_drone_state(client):
     """Fetch position, yaw and speed from the AirSim client."""
@@ -41,10 +44,14 @@ def retain_recent_logs(log_dir: str, keep: int = 5) -> None:
     retain_recent_files(log_dir, "*.csv", keep)
 
 
-def should_flat_wall_dodge(center_mag: float, probe_mag: float, probe_count: int,
-                           min_probe_features: int = 5,
-                           flow_std: float = 0.0,
-                           std_threshold: float = FLOW_STD_MAX) -> bool:
+def should_flat_wall_dodge(
+    center_mag: float,
+    probe_mag: float,
+    probe_count: int,
+    min_probe_features: int = 5,
+    flow_std: float = 0.0,
+    std_threshold: float = FLOW_STD_MAX,
+) -> bool:
     """Return True when probe flow is low but has enough features to
     confidently interpret a flat wall straight ahead.
 
@@ -59,9 +66,11 @@ def should_flat_wall_dodge(center_mag: float, probe_mag: float, probe_count: int
     min_probe_features : int, optional
         Required feature count to consider the probe reliable.
     flow_std : float, optional
-        Standard deviation of all tracked flow magnitudes for the current frame.
+        Standard deviation of all tracked flow magnitudes for the
+        current frame.
     std_threshold : float, optional
-        Maximum allowed standard deviation before the flow is deemed unreliable.
+        Maximum allowed standard deviation before the flow is deemed
+        unreliable.
     """
 
     if flow_std > std_threshold:
