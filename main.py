@@ -127,15 +127,6 @@ def main():
         while not exit_flag.is_set():
             frame_count += 1
             time_now = time.time()  # <-- Add this line
-
-            if navigator.motion_future:
-                if getattr(navigator.motion_future, "_set_flag", False):
-                    navigator.motion_future = None
-                    if navigator.dodging and not navigator.settling:
-                        navigator.settling = True
-                        navigator.settle_end_time = time_now + 2.0
-                else:
-                    continue
             # Handle settle phase after dodge
             if navigator.settling:
                 if time_now < navigator.settle_end_time:
