@@ -54,15 +54,14 @@ def test_dodge_left_sets_flags_and_calls():
     assert nav.braked is False
     assert nav.dodging is True
     assert nav.last_movement_time > prev
-    assert client.moveByVelocityBodyFrameAsync.call_count == 2
-    call1 = client.moveByVelocityBodyFrameAsync.call_args_list[0]
-    assert call1.args == (0, 0, 0, 0.2)
-    call2 = client.moveByVelocityBodyFrameAsync.call_args_list[1]
-    assert call2.args == (0.1, -1.0, 0, 2.0)
-    fut1 = client.calls[0][3]
-    fut2 = client.calls[1][3]
-    assert fut1.join_called is False
-    assert fut2.join_called is False
+    client.moveByVelocityAsync.assert_called_once_with(0, 0, 0, 1)
+    client.moveByVelocityBodyFrameAsync.assert_called_once()
+    call = client.moveByVelocityBodyFrameAsync.call_args
+    assert call.args == (0.0, -1.0, 0, 2.0)
+    fut_brake = client.calls[0][3]
+    fut_lateral = client.calls[1][3]
+    assert fut_brake.join_called is False
+    assert fut_lateral.join_called is False
 
 
 def test_ambiguous_dodge_forces_lower_flow_side():
@@ -70,11 +69,10 @@ def test_ambiguous_dodge_forces_lower_flow_side():
     nav = Navigator(client)
     result = nav.dodge(10, 10.5, 11)
     assert result == 'dodge_left'
-    assert client.moveByVelocityBodyFrameAsync.call_count == 2
-    call1 = client.moveByVelocityBodyFrameAsync.call_args_list[0]
-    assert call1.args == (0, 0, 0, 0.2)
-    call2 = client.moveByVelocityBodyFrameAsync.call_args_list[1]
-    assert call2.args == (0.0, -1.0, 0, 2.0)
+    client.moveByVelocityAsync.assert_called_once_with(0, 0, 0, 1)
+    client.moveByVelocityBodyFrameAsync.assert_called_once()
+    call = client.moveByVelocityBodyFrameAsync.call_args
+    assert call.args == (0.0, -1.0, 0, 2.0)
 
 
 def test_resume_forward_clears_flags_and_calls():
