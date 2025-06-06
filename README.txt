@@ -4,7 +4,7 @@ This project implements a real-time optical flow-based navigation system for an 
 
 ## Features
 
-* 🧠 Optical flow tracking using Lucas-Kanade method with CLAHE enhancement
+* 🧠 Optical flow tracking uses CLAHE-enhanced frames for stable feature detection
 * 📊 Flow history smoothing for left, center, and right partitions
 * ✈️ Autonomous decision logic: brake, dodge, resume, and blind forward
 * 🪟 Simple GUI showing a STOP button, live flow magnitudes, and the current state
@@ -28,7 +28,7 @@ AirSimExperiments/
 ## How It Works
 
 1. **Startup phase**: The UAV takes off and waits a few frames to stabilize.
-2. **Tracking**: Optical flow tracks features between consecutive grayscale images.
+2. **Tracking**: Each grayscale frame is contrast-enhanced with CLAHE before detecting features, then optical flow tracks them between frames.
 3. **Analysis**: Magnitude of motion vectors is averaged across image partitions.
 4. **Navigation decisions**:
 
