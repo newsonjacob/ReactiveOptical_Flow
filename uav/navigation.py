@@ -29,7 +29,7 @@ class Navigator:
     def brake(self):
         """Stop the drone immediately."""
         print("🛑 Braking")
-        self.client.moveByVelocityAsync(0, 0, 0, 1).join()
+        self.client.moveByVelocityAsync(0, 0, 0, 1)
         self.braked = True
         return "brake"
 
@@ -58,7 +58,7 @@ class Navigator:
         forward_speed = 0.0 if smooth_C > 1.0 else 0.3
 
         # Stop briefly
-        self.client.moveByVelocityBodyFrameAsync(0, 0, 0, 0.2).join()
+        self.client.moveByVelocityBodyFrameAsync(0, 0, 0, 0.2)
 
         print(
             f"🔀 Dodging {direction} (strength {strength:.1f}, "
@@ -69,7 +69,7 @@ class Navigator:
             lateral * strength,
             0,
             duration
-        ).join()
+        )
 
         self.dodging = True
         self.braked = False
@@ -104,14 +104,14 @@ class Navigator:
             duration=2,
             drivetrain=airsim.DrivetrainType.ForwardOnly,
             yaw_mode=airsim.YawMode(False, 0),
-        ).join()
+        )
         self.last_movement_time = time.time()
         return "blind_forward"
 
     def nudge(self):
         """Gently push the drone forward when stalled."""
         print("⚠️ Low flow + zero velocity — nudging forward")
-        self.client.moveByVelocityAsync(0.5, 0, 0, 1).join()
+        self.client.moveByVelocityAsync(0.5, 0, 0, 1)
         self.last_movement_time = time.time()
         return "nudge"
 
@@ -132,6 +132,6 @@ class Navigator:
     def timeout_recover(self):
         """Move slowly forward after a command timeout."""
         print("⏳ Timeout — forcing recovery motion")
-        self.client.moveByVelocityAsync(0.5, 0, 0, 1).join()
+        self.client.moveByVelocityAsync(0.5, 0, 0, 1)
         self.last_movement_time = time.time()
         return "timeout_nudge"

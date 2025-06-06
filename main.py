@@ -221,7 +221,7 @@ def main():
 
             if args.manual_nudge and frame_count == 5:
                 print("🔧 Manual nudge forward for test")
-                client.moveByVelocityAsync(2, 0, 0, 2).join()
+                client.moveByVelocityAsync(2, 0, 0, 2)
 
             # --- Optical flow processing ---
             good_old, flow_vectors, flow_std = tracker.process_frame(gray, start_time)
