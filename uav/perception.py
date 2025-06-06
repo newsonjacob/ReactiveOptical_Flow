@@ -10,6 +10,8 @@ from typing import Deque, Dict, Optional, Tuple
 import cv2
 import numpy as np
 
+from .utils import apply_clahe
+
 
 class FlowHistory:
     """Maintain a rolling window of recent flow magnitudes."""
@@ -69,9 +71,10 @@ class OpticalFlowTracker:
         Args:
             gray_frame: Grayscale image used to seed the tracker.
         """
-        self.prev_gray = gray_frame
+        gray_eq = apply_clahe(gray_frame)
+        self.prev_gray = gray_eq
         self.prev_pts = cv2.goodFeaturesToTrack(
-            gray_frame,
+            gray_eq,
             mask=None,
             **self.feature_params,
         )
@@ -93,13 +96,15 @@ class OpticalFlowTracker:
             feature locations, ``vectors`` are the motion vectors between
             frames and ``std`` is the standard deviation of their magnitudes.
         """
+        gray_eq = apply_clahe(gray)
+
         if self.prev_gray is None or self.prev_pts is None:
             self.initialize(gray)
             return np.array([]), np.array([]), 0.0
 
         next_pts, status, err = cv2.calcOpticalFlowPyrLK(
             self.prev_gray,
-            gray,
+            gray_eq,
             self.prev_pts,
             None,
             **self.lk_params,
@@ -116,9 +121,9 @@ class OpticalFlowTracker:
         dt = max(current_time - self.prev_time, 1e-6)  # avoid div by zero
         self.prev_time = current_time
 
-        self.prev_gray = gray
+        self.prev_gray = gray_eq
         self.prev_pts = cv2.goodFeaturesToTrack(
-            gray,
+            gray_eq,
             mask=None,
             **self.feature_params,
         )
