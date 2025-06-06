@@ -39,6 +39,8 @@ if importlib.util.find_spec('cv2') is None:
         goodFeaturesToTrack=lambda *a, **k: None,
         calcOpticalFlowPyrLK=lambda *a, **k: (None, None, None)
     )
+    import importlib.machinery
+    cv2_stub.__spec__ = importlib.machinery.ModuleSpec('cv2', loader=None)
     sys.modules["cv2"] = cv2_stub
 # Minimal airsim stub for environments without AirSim
 class DummyYawMode:

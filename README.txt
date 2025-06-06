@@ -89,6 +89,13 @@ frame,time,features,flow_left,flow_center,flow_right,flow_std,pos_x,pos_y,pos_z,
 1,0.05,120,3.2,1.1,2.0,0.8,0.12,0.00,-2.00,0.0,1.7,resume,0,0,1,50.0,8.0,20.0,18.5,0.01,0.01,0.0,0.05
 ```
 
+## Logging
+
+Running `DroneController.run()` automatically creates a file like
+`flow_logs/full_log_YYYYMMDD_HHMMSS.csv`. The first processed frame writes the
+CSV header and each subsequent call to `log_frame()` appends a new row. Older
+logs are cleaned up so only the most recent few are kept.
+
 ## Parameters
 
 `FLOW_STD_MAX` controls the maximum tolerated variance of optical flow
