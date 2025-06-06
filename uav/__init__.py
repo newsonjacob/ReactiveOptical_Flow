@@ -2,6 +2,7 @@
 
 from .perception import OpticalFlowTracker, FlowHistory
 from .navigation import Navigator
+from .controller import DroneController
 from .interface import exit_flag, start_gui
 from .utils import apply_clahe, get_yaw, get_speed, get_drone_state
 
@@ -15,5 +16,6 @@ __all__ = [
     "get_yaw",
     "get_speed",
     "get_drone_state",
+    "DroneController",
 ]
 
