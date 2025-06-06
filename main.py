@@ -296,7 +296,13 @@ def main():
 
                 # === Recovery / Maintenance States (always allowed)
                 if state_str == "none":
-                    if (navigator.braked or navigator.dodging) and smooth_C < 10 and smooth_L < 10 and smooth_R < 10:
+                    if (
+                        (navigator.braked or navigator.dodging)
+                        and smooth_C < 10
+                        and smooth_L < 10
+                        and smooth_R < 10
+                        and time_now >= navigator.grace_period_end_time
+                    ):
                         state_str = navigator.resume_forward()
                     elif not navigator.braked and not navigator.dodging and time_now - navigator.last_movement_time > 2:
                         state_str = navigator.reinforce()

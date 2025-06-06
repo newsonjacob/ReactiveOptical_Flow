@@ -131,3 +131,22 @@ def test_dodge_settle_duration_short():
     nav.dodge(0, 0, 20)
     assert nav.settling is True
     assert nav.settle_end_time - before <= 0.5
+
+
+def test_resume_forward_not_called_during_grace():
+    client = DummyClient()
+    nav = Navigator(client)
+    nav.dodging = True
+    nav.grace_period_end_time = time.time() + 1.0
+    nav.resume_forward = mock.MagicMock()
+    time_now = time.time()
+    smooth_L = smooth_C = smooth_R = 0
+    if (
+        (nav.braked or nav.dodging)
+        and smooth_C < 10
+        and smooth_L < 10
+        and smooth_R < 10
+        and time_now >= nav.grace_period_end_time
+    ):
+        nav.resume_forward()
+    nav.resume_forward.assert_not_called()
