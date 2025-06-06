@@ -58,7 +58,7 @@ def test_dodge_left_sets_flags_and_calls():
     call1 = client.moveByVelocityBodyFrameAsync.call_args_list[0]
     assert call1.args == (0, 0, 0, 0.2)
     call2 = client.moveByVelocityBodyFrameAsync.call_args_list[1]
-    assert call2.args == (0.3, -1.0, 0, 2.0)
+    assert call2.args == (0.1, -1.0, 0, 2.0)
     fut1 = client.calls[0][3]
     fut2 = client.calls[1][3]
     assert fut1.join_called is False

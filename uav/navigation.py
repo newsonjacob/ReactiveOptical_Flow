@@ -55,7 +55,8 @@ class Navigator:
 
         lateral = 1.0 if direction == "right" else -1.0
         strength = 0.5 if max(smooth_L, smooth_R) > 100 else 1.0
-        forward_speed = 0.0 if smooth_C > 1.0 else 0.3
+        # Reduce forward motion during the dodge to prioritize lateral movement
+        forward_speed = 0.0 if smooth_C > 1.0 else 0.1
 
         # Stop briefly
         self.client.moveByVelocityBodyFrameAsync(0, 0, 0, 0.2)
