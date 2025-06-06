@@ -151,6 +151,9 @@ def main():
                     except Exception:
                         pass
 
+                    # Reset loop timing so loop_s reflects the settle delay only
+                    loop_start = time.time()
+
                     continue
 
                 else:
