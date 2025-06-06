@@ -65,7 +65,10 @@ class DroneController:
         """Update optical flow and return smoothed magnitudes."""
         assert self.tracker is not None
         good_old, flow_vectors, flow_std = self.tracker.process_frame(gray, time.time())
-        magnitudes = np.linalg.norm(flow_vectors, axis=1)
+        if flow_vectors.ndim < 2:
+            magnitudes = np.array([])
+        else:
+            magnitudes = np.linalg.norm(flow_vectors, axis=1)
         h, w = gray.shape
         if len(good_old) == 0:
             self.history.update(0.0, 0.0, 0.0)
