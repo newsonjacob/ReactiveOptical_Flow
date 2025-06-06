@@ -7,6 +7,7 @@ from uav.navigation import Navigator
 class DummyFuture:
     def __init__(self):
         self.join_called = False
+        self._set_flag = True
 
     def join(self):
         self.join_called = True
@@ -41,7 +42,8 @@ def test_brake_updates_flags_and_calls():
     name, args, kwargs, fut = client.calls[-1]
     assert name == 'moveByVelocityAsync'
     assert args == (0, 0, 0, 1)
-    assert fut.join_called is True
+    assert fut.join_called is False
+    assert nav.motion_future is fut
 
 
 def test_dodge_left_sets_flags_and_calls():
@@ -60,8 +62,9 @@ def test_dodge_left_sets_flags_and_calls():
     assert call2.args == (0.3, -1.0, 0, 2.0)
     fut1 = client.calls[0][3]
     fut2 = client.calls[1][3]
-    assert fut1.join_called is True
-    assert fut2.join_called is True
+    assert fut1.join_called is False
+    assert fut2.join_called is False
+    assert nav.motion_future is fut2
 
 
 def test_ambiguous_dodge_forces_lower_flow_side():
@@ -74,6 +77,7 @@ def test_ambiguous_dodge_forces_lower_flow_side():
     assert call1.args == (0, 0, 0, 0.2)
     call2 = client.moveByVelocityBodyFrameAsync.call_args_list[1]
     assert call2.args == (0.0, -1.0, 0, 2.0)
+    assert nav.motion_future is client.calls[1][3]
 
 
 def test_resume_forward_clears_flags_and_calls():
@@ -104,7 +108,8 @@ def test_nudge_updates_time_and_calls():
     name, args, kwargs, fut = client.calls[-1]
     assert name == 'moveByVelocityAsync'
     assert args == (0.5, 0, 0, 1)
-    assert fut.join_called is True
+    assert fut.join_called is False
+    assert nav.motion_future is fut
 
 
 def test_reinforce_updates_time_and_calls():
