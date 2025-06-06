@@ -88,7 +88,7 @@ class Navigator:
             duration=3,
             drivetrain=airsim.DrivetrainType.ForwardOnly,
             yaw_mode=airsim.YawMode(False, 0),
-        ).join()
+        )
         self.braked = False
         self.dodging = False
         self.last_movement_time = time.time()
@@ -125,7 +125,7 @@ class Navigator:
             duration=3,
             drivetrain=airsim.DrivetrainType.ForwardOnly,
             yaw_mode=airsim.YawMode(False, 0),
-        ).join()
+        )
         self.last_movement_time = time.time()
         return "resume_reinforce"
 
