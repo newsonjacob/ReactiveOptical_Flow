@@ -13,7 +13,10 @@ import sys
 
 # Ensure the repository root is on sys.path when executed directly
 if __package__ is None:
-    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+    sys.path.insert(
+        0,
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "..")),
+    )
 
 from analysis.summarize_runs import summarize_log
 from analysis.utils import retain_recent_views

@@ -1,9 +1,10 @@
-import pandas as pd
-import json
 import argparse
+import json
+
+import pandas as pd
 import plotly.graph_objects as go
 from scipy.spatial.transform import Rotation as R
-import numpy as np  # exposed for tests
+import numpy as np  # exposed for tests  # noqa: F401
 
 
 def load_telemetry(log_path):
@@ -63,8 +64,6 @@ def find_alignment_marker(obstacles, marker_name="PlayerStart_3"):
     Returns:
         Numpy array containing the marker's ``(x, y, z)`` position.
     """
-    import numpy as np
-
     for obj in obstacles:
         if obj['name'] == marker_name:
             return np.array(obj['location'])
@@ -82,8 +81,6 @@ def compute_offset(uav_start, marker_position, scale=1.0):
     Returns:
         ``(x, y, z)`` offset to add to the UAV coordinates.
     """
-    import numpy as np
-
     return marker_position - uav_start * scale
 
 
@@ -98,23 +95,32 @@ def draw_box(center, dimensions, rotation_euler):
     Returns:
         A list of ``go.Scatter3d`` objects outlining the box edges.
     """
-    import numpy as np
-
     cx, cy, cz = center
     dx, dy, dz = [d / 2.0 for d in dimensions]
     corners = np.array([
-        [-dx, -dy, -dz], [ dx, -dy, -dz], [ dx,  dy, -dz], [-dx,  dy, -dz],
-        [-dx, -dy,  dz], [ dx, -dy,  dz], [ dx,  dy,  dz], [-dx,  dy,  dz],
+        [-dx, -dy, -dz], [dx, -dy, -dz], [dx, dy, -dz], [-dx, dy, -dz],
+        [-dx, -dy, dz], [dx, -dy, dz], [dx, dy, dz], [-dx, dy, dz],
     ])
     rot = R.from_euler('xyz', rotation_euler).as_matrix()
     rotated = np.dot(corners, rot.T) + np.array(center)
-    edges = [(0,1), (1,2), (2,3), (3,0), (4,5), (5,6), (6,7), (7,4),
-             (0,4), (1,5), (2,6), (3,7)]
+    edges = [
+        (0, 1), (1, 2), (2, 3), (3, 0),
+        (4, 5), (5, 6), (6, 7), (7, 4),
+        (0, 4), (1, 5), (2, 6), (3, 7),
+    ]
     lines = []
     for start, end in edges:
         xs, ys, zs = zip(rotated[start], rotated[end])
-        lines.append(go.Scatter3d(x=xs, y=ys, z=zs, mode='lines',
-                                  line=dict(color='red', width=2), showlegend=False))
+        lines.append(
+            go.Scatter3d(
+                x=xs,
+                y=ys,
+                z=zs,
+                mode='lines',
+                line=dict(color='red', width=2),
+                showlegend=False,
+            )
+        )
     return lines
 
 
@@ -130,10 +136,10 @@ def build_plot(uav_path, obstacles, offset, scale):
     Returns:
         A ``plotly.graph_objects.Figure`` containing the scene.
     """
-    import numpy as np
-
     uav_scaled = np.array(uav_path) * scale
-    uav_flipped = np.column_stack((uav_scaled[:, 0], -uav_scaled[:, 1], uav_scaled[:, 2]))
+    uav_flipped = np.column_stack(
+        (uav_scaled[:, 0], -uav_scaled[:, 1], uav_scaled[:, 2])
+    )
     uav_aligned = uav_flipped + offset
 
     path_trace = go.Scatter3d(
@@ -161,7 +167,13 @@ def build_plot(uav_path, obstacles, offset, scale):
         if bool((dims > 200).any()) and dims[1] > 100:
             continue
 
-        box_lines.extend(draw_box(obs['location'], obs['dimensions'], obs['rotation']))
+        box_lines.extend(
+            draw_box(
+                obs['location'],
+                obs['dimensions'],
+                obs['rotation'],
+            )
+        )
 
     fig = go.Figure(data=[path_trace] + box_lines)
     fig.update_layout(
@@ -179,10 +191,27 @@ def main():
         None
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--log', required=True, help="Path to UAV flight log CSV")
-    parser.add_argument('--obstacles', default="analysis/obstacles.json", help="Path to obstacles JSON")
-    parser.add_argument('--output', default="uav_debug_view.html", help="Output HTML file")
-    parser.add_argument('--scale', type=float, default=1.0, help="Scale multiplier for UAV data")
+    parser.add_argument(
+        '--log',
+        required=True,
+        help="Path to UAV flight log CSV",
+    )
+    parser.add_argument(
+        '--obstacles',
+        default="analysis/obstacles.json",
+        help="Path to obstacles JSON",
+    )
+    parser.add_argument(
+        '--output',
+        default="uav_debug_view.html",
+        help="Output HTML file",
+    )
+    parser.add_argument(
+        '--scale',
+        type=float,
+        default=1.0,
+        help="Scale multiplier for UAV data",
+    )
     args = parser.parse_args()
 
     try:

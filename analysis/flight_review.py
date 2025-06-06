@@ -22,14 +22,20 @@ def parse_log(path: str) -> Dict[str, Any]:
     else:
         collisions = 0
 
-    fps_avg = float(df["fps"].mean()) if "fps" in df.columns else float("nan")
-    loop_avg = float(df["loop_s"].mean()) if "loop_s" in df.columns else float("nan")
+    fps_avg = (
+        float(df["fps"].mean()) if "fps" in df.columns else float("nan")
+    )
+    loop_avg = (
+        float(df["loop_s"].mean()) if "loop_s" in df.columns else float("nan")
+    )
 
     start = df.loc[0, ["pos_x", "pos_y", "pos_z"]].to_numpy()
     end = df.loc[df.index[-1], ["pos_x", "pos_y", "pos_z"]].to_numpy()
     distance = float(np.linalg.norm(end - start))
 
-    states = df["state"].value_counts().to_dict() if "state" in df.columns else {}
+    states = (
+        df["state"].value_counts().to_dict() if "state" in df.columns else {}
+    )
 
     return {
         "frames": frames,
@@ -43,7 +49,11 @@ def parse_log(path: str) -> Dict[str, Any]:
     }
 
 
-def align_path(path: np.ndarray, obstacles: List[dict], scale: float = 1.0) -> np.ndarray:
+def align_path(
+    path: np.ndarray,
+    obstacles: List[dict],
+    scale: float = 1.0,
+) -> np.ndarray:
     """Return the UAV path aligned to obstacle coordinates."""
     from .visualize_flight import find_alignment_marker, compute_offset
 
@@ -56,7 +66,10 @@ def align_path(path: np.ndarray, obstacles: List[dict], scale: float = 1.0) -> n
     return aligned
 
 
-def review_run(log_path: str, obstacles_path: str = "analysis/obstacles.json") -> Dict[str, Any]:
+def review_run(
+    log_path: str,
+    obstacles_path: str = "analysis/obstacles.json",
+) -> Dict[str, Any]:
     """Compile statistics and alignment info for a single run."""
     from .visualize_flight import load_obstacles, load_telemetry
 
