@@ -12,7 +12,6 @@ class Navigator:
         self.braked = False
         self.dodging = False
         self.settling = False
-        self.motion_future = None
         self.last_movement_time = time.time()
         self.grace_period_end_time = 0
         self.settle_end_time = 0
@@ -30,7 +29,7 @@ class Navigator:
     def brake(self):
         """Stop the drone immediately."""
         print("🛑 Braking")
-        self.motion_future = self.client.moveByVelocityAsync(0, 0, 0, 1)
+        self.client.moveByVelocityAsync(0, 0, 0, 1).join()
         self.braked = True
         return "brake"
 
@@ -59,22 +58,23 @@ class Navigator:
         forward_speed = 0.0 if smooth_C > 1.0 else 0.3
 
         # Stop briefly
-        self.client.moveByVelocityBodyFrameAsync(0, 0, 0, 0.2)
+        self.client.moveByVelocityBodyFrameAsync(0, 0, 0, 0.2).join()
 
         print(
             f"🔀 Dodging {direction} (strength {strength:.1f}, "
             f"forward {forward_speed:.1f})"
         )
-        self.motion_future = self.client.moveByVelocityBodyFrameAsync(
+        self.client.moveByVelocityBodyFrameAsync(
             forward_speed,
             lateral * strength,
             0,
             duration
-        )
+        ).join()
 
         self.dodging = True
         self.braked = False
-        self.settling = False
+        self.settling = True
+        self.settle_end_time = time.time() + 2.0
         self.last_movement_time = time.time()
         return f"dodge_{direction}"
 
@@ -97,28 +97,28 @@ class Navigator:
     def blind_forward(self):
         """Move forward when no features are detected."""
         print("⚠️ No features — continuing blind forward motion")
-        self.motion_future = self.client.moveByVelocityAsync(
+        self.client.moveByVelocityAsync(
             2,
             0,
             0,
             duration=2,
             drivetrain=airsim.DrivetrainType.ForwardOnly,
             yaw_mode=airsim.YawMode(False, 0),
-        )
+        ).join()
         self.last_movement_time = time.time()
         return "blind_forward"
 
     def nudge(self):
         """Gently push the drone forward when stalled."""
         print("⚠️ Low flow + zero velocity — nudging forward")
-        self.motion_future = self.client.moveByVelocityAsync(0.5, 0, 0, 1)
+        self.client.moveByVelocityAsync(0.5, 0, 0, 1).join()
         self.last_movement_time = time.time()
         return "nudge"
 
     def reinforce(self):
         """Reissue the forward command to reinforce motion."""
         print("🔁 Reinforcing forward motion")
-        self.motion_future = self.client.moveByVelocityAsync(
+        self.client.moveByVelocityAsync(
             2,
             0,
             0,
@@ -132,6 +132,6 @@ class Navigator:
     def timeout_recover(self):
         """Move slowly forward after a command timeout."""
         print("⏳ Timeout — forcing recovery motion")
-        self.motion_future = self.client.moveByVelocityAsync(0.5, 0, 0, 1)
+        self.client.moveByVelocityAsync(0.5, 0, 0, 1).join()
         self.last_movement_time = time.time()
         return "timeout_nudge"
