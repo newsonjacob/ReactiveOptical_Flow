@@ -1,4 +1,5 @@
 import unittest.mock as mock
+import time
 from tests.conftest import airsim_stub
 
 from uav.navigation import Navigator
@@ -121,3 +122,12 @@ def test_reinforce_updates_time_and_calls():
     assert args[:3] == (2, 0, 0)
     assert kwargs.get('duration') == 3
     assert kwargs.get('drivetrain') == airsim_stub.DrivetrainType.ForwardOnly
+
+
+def test_dodge_settle_duration_short():
+    client = DummyClient()
+    nav = Navigator(client)
+    before = time.time()
+    nav.dodge(0, 0, 20)
+    assert nav.settling is True
+    assert nav.settle_end_time - before <= 0.5

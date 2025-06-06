@@ -126,36 +126,12 @@ def main():
         loop_start = time.time()
         while not exit_flag.is_set():
             frame_count += 1
-            time_now = time.time()  # <-- Add this line
-            # Handle settle phase after dodge
-            if navigator.settling:
-                if time_now < navigator.settle_end_time:
-                    ...
-                    # Log settle state
-                    pos, yaw, speed = get_drone_state(client)
-                    collision = client.simGetCollisionInfo()
-                    collided = int(getattr(collision, "has_collided", False))
-
-                    log_buffer.append(
-                        f"{frame_count},{time_now:.2f},0,0,0,0,0,"
-                        f"{pos.x_val:.2f},{pos.y_val:.2f},{pos.z_val:.2f},{yaw:.2f},{speed:.2f},settling,{collided},0,"
-                        f"0,0,0,0,0,0,0,{time.time() - loop_start:.3f}\n"
-                    )
-
-                    if frame_count % LOG_INTERVAL == 0:
-                        log_file.writelines(log_buffer)
-                        log_buffer.clear()
-
-                    try:
-                        frame_queue.put_nowait(vis_img)
-                    except Exception:
-                        pass
-
-                    continue
-
-                else:
-                    print("✅ Settle period over — resuming evaluation")
-                    navigator.settling = False
+            time_now = time.time()
+            prev_state = param_refs['state'][0]
+            # Handle brief settle period after dodge
+            if navigator.settling and time_now >= navigator.settle_end_time:
+                print("✅ Settle period over — resuming evaluation")
+                navigator.settling = False
 
             if time_now - start_time >= MAX_SIM_DURATION:
                 print("⏱️ Time limit reached — landing and stopping.")
@@ -329,6 +305,14 @@ def main():
                     elif time_now - navigator.last_movement_time > 4:
                         state_str = navigator.timeout_recover()
 
+            if (
+                state_str == "none"
+                and navigator.dodging
+                and time_now < navigator.grace_period_end_time
+                and isinstance(prev_state, str)
+                and prev_state.startswith("dodge")
+            ):
+                state_str = prev_state
             param_refs['state'][0] = state_str
             obstacle_detected = int('dodge' in state_str or state_str == 'brake')
 
