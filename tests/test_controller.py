@@ -78,3 +78,28 @@ def test_high_center_brake(monkeypatch):
     state = ctrl.decide_action(points, 0.0, 40.0, 0.0, time_now=1.0)
     assert state == 'brake'
     assert 'brake' in ctrl.navigator.calls
+
+
+def test_run_creates_log_file(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    ctrl = setup_controller(monkeypatch)
+
+    ctrl.capture_frame = lambda: (None, 0.0, 0.0)
+    ctrl.process_frame = lambda g: ([], [], 0.0, 0.0, 0.0, 0.0)
+    ctrl.decide_action = lambda *a, **k: 'resume'
+
+    call = {'n': 0}
+
+    def fake_is_set():
+        call['n'] += 1
+        return call['n'] > 1
+
+    monkeypatch.setattr('uav.controller.exit_flag.is_set', fake_is_set)
+    monkeypatch.setattr('uav.controller.retain_recent_logs', lambda *a, **k: None)
+
+    ctrl.run()
+
+    logs = list((tmp_path / 'flow_logs').glob('full_log_*.csv'))
+    assert len(logs) == 1
+    lines = logs[0].read_text().splitlines()
+    assert len(lines) >= 2

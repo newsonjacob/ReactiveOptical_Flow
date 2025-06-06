@@ -10,6 +10,8 @@ The implementation reuses the existing ``Navigator`` and
 from __future__ import annotations
 
 import time
+import os
+import csv
 from typing import Tuple
 
 import cv2
@@ -18,7 +20,12 @@ import airsim
 
 from .perception import OpticalFlowTracker, FlowHistory
 from .navigation import Navigator
-from .utils import get_drone_state, should_flat_wall_dodge, FLOW_STD_MAX
+from .utils import (
+    get_drone_state,
+    should_flat_wall_dodge,
+    FLOW_STD_MAX,
+    retain_recent_logs,
+)
 from .interface import exit_flag
 
 
@@ -37,6 +44,8 @@ class DroneController:
             "R": [0.0],
             "state": [""],
         }
+        self.log_path = ""
+        self._header_written = False
 
     def initialize(self, lk_params: dict, feature_params: dict) -> None:
         """Initialise the optical flow tracker."""
@@ -163,21 +172,41 @@ class DroneController:
 
     # ------------------------------------------------------------------
     def log_frame(self, state: str, **info) -> None:
-        """Placeholder for future logging logic."""
-        # In the refactored tests we simply record the state for verification.
+        """Append frame data to the CSV log file."""
+        if not self.log_path:
+            return
+
         info.setdefault("frame", self.frame_count)
         info.setdefault("state", state)
-        # Real implementation would append to CSV file.
+
+        if not self._header_written:
+            self._log_fields = list(info.keys())
+            with open(self.log_path, "w", newline="") as f:
+                writer = csv.DictWriter(f, fieldnames=self._log_fields)
+                writer.writeheader()
+                writer.writerow(info)
+            self._header_written = True
+        else:
+            with open(self.log_path, "a", newline="") as f:
+                writer = csv.DictWriter(f, fieldnames=self._log_fields)
+                writer.writerow(info)
 
     # ------------------------------------------------------------------
     def run(self) -> None:
         """Example run loop demonstrating method usage."""
         if self.tracker is None:
             raise RuntimeError("initialize() must be called before run()")
-        while not exit_flag.is_set():
-            gray, *_ = self.capture_frame()
-            pts, vecs, std, sL, sC, sR = self.process_frame(gray)
-            state = self.decide_action(pts, sL, sC, sR)
-            self.log_frame(state)
-            self.frame_count += 1
+        os.makedirs("flow_logs", exist_ok=True)
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        self.log_path = os.path.join("flow_logs", f"full_log_{timestamp}.csv")
+        self._header_written = False
+        try:
+            while not exit_flag.is_set():
+                gray, *_ = self.capture_frame()
+                pts, vecs, std, sL, sC, sR = self.process_frame(gray)
+                state = self.decide_action(pts, sL, sC, sR)
+                self.log_frame(state)
+                self.frame_count += 1
+        finally:
+            retain_recent_logs("flow_logs")
 
