@@ -64,7 +64,8 @@ def main():
     client.takeoffAsync().join()
     client.moveToPositionAsync(0, 0, -2, 2).join()
 
-    feature_params = dict(maxCorners=75, qualityLevel=0.1, minDistance=5, blockSize=5)
+    # Tune feature detection to pick up more corners even on smooth surfaces
+    feature_params = dict(maxCorners=150, qualityLevel=0.05, minDistance=5, blockSize=5)
     lk_params = dict(winSize=(15, 15), maxLevel=2,
                      criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
 
