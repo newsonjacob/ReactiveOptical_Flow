@@ -70,7 +70,10 @@ pytest
    ```
    If omitted, the path defaults to `UE4_PATH` if set, otherwise to the value used during development.
 
-3. The GUI displays the STOP button along with left/center/right flow values and the current state. Click STOP to end the simulation cleanly.
+3. After connecting, the program launches the Tkinter GUI using the controller's
+   live parameter references. The window shows the STOP button together with
+   left/center/right flow magnitudes and the current state. Click STOP to end
+   the simulation cleanly.
 
 ## Batch Runs
 
