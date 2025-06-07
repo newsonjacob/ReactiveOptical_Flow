@@ -471,6 +471,7 @@ def main():
             ])
             print(f"✅ 3D visualisation saved to {html_output}")
             retain_recent_views("analysis")
+            retain_recent_logs("flow_logs")
         except Exception as e:
             print(f"⚠️ Visualization failed: {e}")
 
