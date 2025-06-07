@@ -11,6 +11,8 @@ import argparse
 from queue import Queue
 from threading import Thread
 
+from uav.utils import FLOW_STD_MAX
+
 # Default path to the Unreal Engine simulator used during development
 DEFAULT_UE4_PATH = r"C:\Users\newso\Documents\AirSimExperiments\BlocksBuild\WindowsNoEditor\Blocks\Binaries\Win64\Blocks.exe"
 
@@ -82,7 +84,6 @@ def main():
     GOAL_X = 29  # distance from start in AirSim coordinates
     GOAL_RADIUS = 1.0  # meters
     MIN_PROBE_FEATURES = 5
-    FLOW_STD_MAX = 10.0
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     os.makedirs("flow_logs", exist_ok=True)
     log_file = open(f"flow_logs/full_log_{timestamp}.csv", 'w')
