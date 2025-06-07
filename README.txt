@@ -153,6 +153,10 @@ with basic statistics for each log.
 * Command line argument parsing for tuning thresholds
 * ROS bridge for physical deployment
 
+## Contributing
+
+See `AGENTS.md` for developer guidelines. Always run `pytest` before submitting changes.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
