@@ -9,8 +9,6 @@ This project implements a real-time optical flow-based navigation system for an 
 * ✈️ Autonomous decision logic: brake, dodge, resume, and blind forward
 * 🪟 Simple GUI showing a STOP button, live flow magnitudes, and the current state
 * 📁 Structured modular code with reusable components
-* 🚀 Perception tasks run in a separate **process** using a dedicated AirSim client so navigation stays responsive
-* 🔄 A cross-process `multiprocessing.Event` coordinates shutdown between the GUI and worker
 * 🏁 Optional goal detection to land automatically when the UAV reaches the end of the course
 
 ## Project Structure
@@ -135,8 +133,6 @@ interactively.
 
 Only the five most recent `flight_view_*.html` files are retained in the
 `analysis/` directory. Older visualizations are removed automatically.
-If the log contains no telemetry, the visualization script now prints a
-message and exits cleanly.
 
 ## Flight Review
 
