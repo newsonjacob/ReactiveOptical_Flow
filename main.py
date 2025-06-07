@@ -251,6 +251,19 @@ def main():
             probe_req = 0.0
             side_safe = False
 
+            # Skip obstacle logic during grace period after resuming
+            if navigator.just_resumed and time_now < navigator.resume_grace_end_time:
+                param_refs['state'][0] = "resume_grace"
+                obstacle_detected = 0
+                # Still log flow and state, but don't issue new nav commands
+                try:
+                    frame_queue.put_nowait(vis_img)
+                except Exception:
+                    pass
+                continue
+            elif navigator.just_resumed and time_now >= navigator.resume_grace_end_time:
+                navigator.just_resumed = False  # Grace over
+
             if len(good_old) < 5: #If the number of "good" feature points tracked by the optical flow algorithm is less than 5, then...
                 if smooth_L > 1.5 and smooth_R > 1.5 and smooth_C < 0.2:
                     state_str = navigator.brake()
@@ -273,13 +286,13 @@ def main():
                 # === Priority 1: Severe brake override (ignores grace period)
                 if smooth_C > (brake_thres * 1.5):
                     state_str = navigator.brake()
-                    navigator.grace_period_end_time = time_now + 2.5
+                    navigator.grace_period_end_time = time_now + 1.5
 
                 elif not in_grace_period:
                     # === Brake Logic
                     if smooth_C > brake_thres:
                         state_str = navigator.brake()
-                        navigator.grace_period_end_time = time_now + 2.5
+                        navigator.grace_period_end_time = time_now + 1.5
                     # elif not probe_reliable and center_mag > 0.7:
                     #     print("⚠️ No probe flow but high center flow — possible wall ahead")
                     #     state_str = navigator.brake()
@@ -288,24 +301,34 @@ def main():
                     # === Dodge Logic
                     elif center_high and side_safe:
                         state_str = navigator.dodge(smooth_L, smooth_C, smooth_R)
-                        navigator.grace_period_end_time = time_now + 2.5
+                        navigator.grace_period_end_time = time_now + 1.5
                     elif probe_mag < 0.5 and center_mag > 0.7:
                         if should_flat_wall_dodge(center_mag, probe_mag, probe_count, MIN_PROBE_FEATURES, flow_std, FLOW_STD_MAX):
                             print("🟥 Flat wall detected — attempting fallback dodge")
                             state_str = navigator.dodge(smooth_L, smooth_C, smooth_R)
-                            navigator.grace_period_end_time = time_now + 2.5
+                            navigator.grace_period_end_time = time_now + 1.5
                         else:
                             print("🔬 Insufficient probe features — ignoring fallback")
 
                 # === Recovery / Maintenance States (always allowed)
                 if state_str == "none":
                     if (
-                        (navigator.braked or navigator.dodging)
-                        and smooth_C < 10
-                        and smooth_L < 10
-                        and smooth_R < 10
+                        navigator.dodging
+                        and smooth_C < dodge_thres * 0.9
+                        and time_now >= navigator.grace_period_end_time
+                        and not navigator.settling
+                    ):
+                        print(f"🔄 Dodge ended — resuming forward at frame {frame_count}")
+                        state_str = navigator.resume_forward()
+
+                    elif (
+                        navigator.braked
+                        and smooth_C < brake_thres * 0.8
+                        and smooth_L < brake_thres * 0.8
+                        and smooth_R < brake_thres * 0.8
                         and time_now >= navigator.grace_period_end_time
                     ):
+                        print(f"🟢 Brake released — resuming forward at frame {frame_count}")
                         state_str = navigator.resume_forward()
                     elif not navigator.braked and not navigator.dodging and time_now - navigator.last_movement_time > 2:
                         state_str = navigator.reinforce()

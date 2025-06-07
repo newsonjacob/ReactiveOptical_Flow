@@ -15,6 +15,8 @@ class Navigator:
         self.last_movement_time = time.time()
         self.grace_period_end_time = 0
         self.settle_end_time = 0
+        self.just_resumed = False
+        self.resume_grace_end_time = 0
 
     def get_state(self):
         """Return the drone position, yaw angle and speed."""
@@ -83,16 +85,13 @@ class Navigator:
     def resume_forward(self):
         """Resume normal forward velocity."""
         print("✅ Resuming forward motion")
-        self.client.moveByVelocityAsync(
-            2,
-            0,
-            0,
-            duration=3,
+        self.client.moveByVelocityAsync(2, 0, 0, duration=3,
             drivetrain=airsim.DrivetrainType.ForwardOnly,
-            yaw_mode=airsim.YawMode(False, 0),
-        )
+            yaw_mode=airsim.YawMode(False, 0))
         self.braked = False
         self.dodging = False
+        self.just_resumed = True
+        self.resume_grace_end_time = time.time() + 0.75  # 0.75 second grace
         self.last_movement_time = time.time()
         return "resume"
 
