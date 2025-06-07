@@ -231,6 +231,11 @@ def main():
     except Exception as e:
         print(f"Error finding alignment marker: {e}")
         return
+
+    if len(telemetry) == 0:
+        print("No telemetry data available")
+        return
+
     offset = compute_offset(telemetry[0], marker, scale=args.scale)
 
     fig = build_plot(telemetry, obstacles, offset, scale=args.scale)
