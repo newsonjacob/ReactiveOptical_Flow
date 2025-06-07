@@ -21,6 +21,89 @@ DEFAULT_UE4_PATH = r"C:\Users\newso\Documents\AirSimExperiments\BlocksBuild\Wind
 ENV_UE4_PATH = os.environ.get("UE4_PATH")
 ue4_default = ENV_UE4_PATH if ENV_UE4_PATH else DEFAULT_UE4_PATH
 
+
+def perception_worker(queue: MPQueue, flag) -> None:
+    """Capture images and compute optical flow in a separate process."""
+    from uav.perception import OpticalFlowTracker
+
+    feature_params = dict(maxCorners=150, qualityLevel=0.05, minDistance=5, blockSize=5)
+    lk_params = dict(
+        winSize=(15, 15),
+        maxLevel=2,
+        criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03),
+    )
+    tracker = OpticalFlowTracker(lk_params, feature_params)
+    last_vis_img = np.zeros((720, 1280, 3), dtype=np.uint8)
+
+    # Use a dedicated RPC client to avoid cross-process issues
+    local_client = airsim.MultirotorClient()
+    local_client.confirmConnection()
+
+    while not flag.is_set():
+        t0 = time.time()
+        responses = local_client.simGetImages([
+            ImageRequest("oakd_camera", ImageType.Scene, False, True)
+        ])
+        t_fetch_end = time.time()
+        response = responses[0]
+
+        if (
+            response.width == 0
+            or response.height == 0
+            or len(response.image_data_uint8) == 0
+        ):
+            data = (
+                last_vis_img,
+                np.array([]),
+                np.array([]),
+                0.0,
+                t_fetch_end - t0,
+                0.0,
+                0.0,
+            )
+        else:
+            img1d = np.frombuffer(response.image_data_uint8, dtype=np.uint8).copy()
+            img = cv2.imdecode(img1d, cv2.IMREAD_COLOR)
+            t_decode_end = time.time()
+            if img is None:
+                continue
+            img = cv2.resize(img, (1280, 720))
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            vis_img = img.copy()
+            last_vis_img = vis_img
+
+            if tracker.prev_gray is None:
+                tracker.initialize(gray)
+                data = (
+                    vis_img,
+                    np.array([]),
+                    np.array([]),
+                    0.0,
+                    t_fetch_end - t0,
+                    t_decode_end - t_fetch_end,
+                    0.0,
+                )
+            else:
+                t_proc_start = time.time()
+                good_old, flow_vectors, flow_std = tracker.process_frame(gray, t0)
+                processing_s = time.time() - t_proc_start
+                data = (
+                    vis_img,
+                    good_old,
+                    flow_vectors,
+                    flow_std,
+                    t_fetch_end - t0,
+                    t_decode_end - t_fetch_end,
+                    processing_s,
+                )
+
+        if queue.full():
+            try:
+                queue.get_nowait()
+            except Exception:
+                pass
+        queue.put(data)
+
 def main():
     parser = argparse.ArgumentParser(description="Optical flow navigation script")
     parser.add_argument("--manual-nudge", action="store_true", help="Enable manual nudge at frame 5 for testing")
@@ -32,7 +115,7 @@ def main():
     args = parser.parse_args()
 
     from uav.interface import exit_flag, start_gui
-    from uav.perception import OpticalFlowTracker, FlowHistory
+    from uav.perception import FlowHistory
     from uav.navigation import Navigator
     from uav.utils import get_drone_state, retain_recent_logs, should_flat_wall_dodge
     from analysis.utils import retain_recent_views
@@ -72,7 +155,6 @@ def main():
     lk_params = dict(winSize=(15, 15), maxLevel=2,
                      criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
 
-    tracker = OpticalFlowTracker(lk_params, feature_params)
     flow_history = FlowHistory()
     navigator = Navigator(client)
     from collections import deque
@@ -117,75 +199,11 @@ def main():
     # Perception process for image capture and optical flow
     perception_queue: MPQueue = MPQueue(maxsize=1)
 
-    def perception_worker(queue: MPQueue, flag) -> None:
-        last_vis_img = np.zeros((720, 1280, 3), dtype=np.uint8)
-        # Use a dedicated RPC client to avoid cross-process issues
-        local_client = airsim.MultirotorClient()
-        local_client.confirmConnection()
-        while not flag.is_set():
-            t0 = time.time()
-            responses = local_client.simGetImages([
-                ImageRequest("oakd_camera", ImageType.Scene, False, True)
-            ])
-            t_fetch_end = time.time()
-            response = responses[0]
-            if (
-                response.width == 0
-                or response.height == 0
-                or len(response.image_data_uint8) == 0
-            ):
-                data = (
-                    last_vis_img,
-                    np.array([]),
-                    np.array([]),
-                    0.0,
-                    t_fetch_end - t0,
-                    0.0,
-                    0.0,
-                )
-            else:
-                img1d = np.frombuffer(response.image_data_uint8, dtype=np.uint8).copy()
-                img = cv2.imdecode(img1d, cv2.IMREAD_COLOR)
-                t_decode_end = time.time()
-                if img is None:
-                    continue
-                img = cv2.resize(img, (1280, 720))
-                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-                vis_img = img.copy()
-                last_vis_img = vis_img
-                if tracker.prev_gray is None:
-                    tracker.initialize(gray)
-                    data = (
-                        vis_img,
-                        np.array([]),
-                        np.array([]),
-                        0.0,
-                        t_fetch_end - t0,
-                        t_decode_end - t_fetch_end,
-                        0.0,
-                    )
-                else:
-                    t_proc_start = time.time()
-                    good_old, flow_vectors, flow_std = tracker.process_frame(gray, t0)
-                    processing_s = time.time() - t_proc_start
-                    data = (
-                        vis_img,
-                        good_old,
-                        flow_vectors,
-                        flow_std,
-                        t_fetch_end - t0,
-                        t_decode_end - t_fetch_end,
-                        processing_s,
-                    )
-
-            if queue.full():
-                try:
-                    queue.get_nowait()
-                except Exception:
-                    pass
-            queue.put(data)
-
-    perception_process = Process(target=perception_worker, args=(perception_queue, exit_flag), daemon=True)
+    perception_process = Process(
+        target=perception_worker,
+        args=(perception_queue, exit_flag),
+        daemon=True,
+    )
     perception_process.start()
 
     # Buffer log lines to throttle disk writes
@@ -416,7 +434,6 @@ def main():
                 except Exception as e:
                     print("Reset error:", e)
 
-                tracker.initialize(gray)
                 flow_history = FlowHistory()
                 navigator = Navigator(client)
                 frame_count = 0
