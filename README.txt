@@ -134,6 +134,8 @@ interactively.
 
 Only the five most recent `flight_view_*.html` files are retained in the
 `analysis/` directory. Older visualizations are removed automatically.
+If the log contains no telemetry, the visualization script now prints a
+message and exits cleanly.
 
 ## Flight Review
 
