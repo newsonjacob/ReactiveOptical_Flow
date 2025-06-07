@@ -12,6 +12,8 @@ from queue import Queue
 from threading import Thread
 from multiprocessing import Process, Queue as MPQueue
 
+from uav.perception import OpticalFlowTracker
+
 from uav.utils import FLOW_STD_MAX
 
 # Default path to the Unreal Engine simulator used during development
@@ -152,8 +154,11 @@ def main():
 
     # Tune feature detection to pick up more corners even on smooth surfaces
     feature_params = dict(maxCorners=150, qualityLevel=0.05, minDistance=5, blockSize=5)
+
     lk_params = dict(winSize=(15, 15), maxLevel=2,
                      criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
+
+    tracker = OpticalFlowTracker(lk_params, feature_params)
 
     flow_history = FlowHistory()
     navigator = Navigator(client)
