@@ -10,6 +10,7 @@ This project implements a real-time optical flow-based navigation system for an 
 * 🪟 Simple GUI showing a STOP button, live flow magnitudes, and the current state
 * 📁 Structured modular code with reusable components
 * 🚀 Perception tasks run in a separate **process** using a dedicated AirSim client so navigation stays responsive
+* 🔄 A cross-process `multiprocessing.Event` coordinates shutdown between the GUI and worker
 * 🏁 Optional goal detection to land automatically when the UAV reaches the end of the course
 
 ## Project Structure
