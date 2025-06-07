@@ -1,10 +1,13 @@
 # uav/utils.py
 """Utility helpers for AirSim drone state and image processing."""
 import math
+import os
+import fnmatch
 import cv2
 import numpy as np
 import airsim
 from analysis.utils import retain_recent_files
+from datetime import datetime
 
 # Maximum acceptable standard deviation of optical flow magnitudes. When the
 # measured value exceeds this threshold the flow is considered unreliable.
@@ -38,10 +41,39 @@ def get_drone_state(client):
     return pos, yaw, speed
 
 
-def retain_recent_logs(log_dir: str, keep: int = 5) -> None:
-    """Keep only the ``keep`` most recent ``.csv`` log files."""
+def _timestamp_from_name(path: str) -> float:
+    """Return a UNIX timestamp parsed from ``full_log_YYYYMMDD_HHMMSS.csv``.
 
-    retain_recent_files(log_dir, "*.csv", keep)
+    Falls back to the file's modification time if parsing fails.
+    """
+    name = os.path.basename(path)
+    ts = name[len("full_log_"):-len(".csv")]
+    try:
+        dt = datetime.strptime(ts, "%Y%m%d_%H%M%S")
+        return dt.timestamp()
+    except Exception:
+        return os.path.getmtime(path)
+
+
+def retain_recent_logs(log_dir: str, keep: int = 5) -> None:
+    """Keep only the ``keep`` most recent ``full_log_*.csv`` files."""
+
+    try:
+        files = [
+            os.path.join(log_dir, f)
+            for f in os.listdir(log_dir)
+            if fnmatch.fnmatch(f, "full_log_*.csv")
+        ]
+    except FileNotFoundError:
+        return
+
+    files.sort(key=_timestamp_from_name, reverse=True)
+
+    for old_file in files[keep:]:
+        try:
+            os.remove(old_file)
+        except OSError:
+            pass
 
 
 def should_flat_wall_dodge(
