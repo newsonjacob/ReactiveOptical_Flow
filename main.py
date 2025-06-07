@@ -95,7 +95,8 @@ def main():
 
     # Video writer setup
     fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-    out = cv2.VideoWriter('flow_output.avi', fourcc, 8.0, (640, 480))
+    # Capture at 720p for better optical flow tracking
+    out = cv2.VideoWriter('flow_output.avi', fourcc, 8.0, (1280, 720))
 
     # Offload video writing to a background thread
     frame_queue: Queue = Queue(maxsize=20)
@@ -115,7 +116,7 @@ def main():
     log_buffer = []
     LOG_INTERVAL = 5  # flush every 5 frames
 
-    last_vis_img = np.zeros((480, 640, 3), dtype=np.uint8)  # Black frame as fallback
+    last_vis_img = np.zeros((720, 1280, 3), dtype=np.uint8)  # Black frame as fallback
 
     target_fps = 20
     frame_duration = 1.0 / target_fps
@@ -185,7 +186,8 @@ def main():
                     pass
                 continue
 
-            img = cv2.resize(img, (640, 480))
+            # Resize to higher resolution for more detailed processing
+            img = cv2.resize(img, (1280, 720))
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             vis_img = img.copy()
             last_vis_img = vis_img  # Update after a valid frame
@@ -376,7 +378,7 @@ def main():
                 frame_queue.put(None)
                 video_thread.join()
                 out.release()
-                out = cv2.VideoWriter('flow_output.avi', fourcc, 8.0, (640, 480))
+                out = cv2.VideoWriter('flow_output.avi', fourcc, 8.0, (1280, 720))
                 video_thread = Thread(target=video_worker, daemon=True)
                 video_thread.start()
                 continue
@@ -463,7 +465,7 @@ def main():
 
             cap = cv2.VideoCapture(input_video)
             fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-            out_fixed = cv2.VideoWriter(output_video, fourcc, median_fps, (640, 480))
+            out_fixed = cv2.VideoWriter(output_video, fourcc, median_fps, (1280, 720))
 
             frame_count = 0
             while True:
