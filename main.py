@@ -140,7 +140,7 @@ def main():
                     0.0,
                 )
             else:
-                img1d = np.frombuffer(response.image_data_uint8, dtype=np.uint8)
+                img1d = np.frombuffer(response.image_data_uint8, dtype=np.uint8).copy()
                 img = cv2.imdecode(img1d, cv2.IMREAD_COLOR)
                 t_decode_end = time.time()
                 if img is None:

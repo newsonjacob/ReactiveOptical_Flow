@@ -32,7 +32,11 @@ def get_speed(velocity):
 
 def get_drone_state(client):
     """Fetch position, yaw and speed from the AirSim client."""
-    state = client.getMultirotorState()
+    try:
+        state = client.getMultirotorState()
+    except Exception as e:
+        print(f"State fetch error: {e}")
+        return airsim.Vector3r(0, 0, 0), 0.0, 0.0
     pos = state.kinematics_estimated.position
     ori = state.kinematics_estimated.orientation
     yaw = get_yaw(ori)
