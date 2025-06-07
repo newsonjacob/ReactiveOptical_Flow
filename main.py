@@ -118,9 +118,12 @@ def main():
 
     def perception_worker() -> None:
         nonlocal last_vis_img
+        # Use a dedicated RPC client to avoid cross-thread issues
+        local_client = airsim.MultirotorClient()
+        local_client.confirmConnection()
         while not exit_flag.is_set():
             t0 = time.time()
-            responses = client.simGetImages([
+            responses = local_client.simGetImages([
                 ImageRequest("oakd_camera", ImageType.Scene, False, True)
             ])
             t_fetch_end = time.time()
