@@ -1,9 +1,10 @@
 # uav/interface.py
 """Simple Tkinter GUI utilities for controlling the simulation."""
 import tkinter as tk
-from threading import Thread, Event
+from threading import Thread
+from multiprocessing import Event
 
-# Use a threading.Event to signal when the application should exit
+# Use a multiprocessing.Event to signal when the application should exit
 exit_flag = Event()
 
 

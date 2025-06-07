@@ -10,6 +10,7 @@ from airsim import ImageRequest, ImageType
 import argparse
 from queue import Queue
 from threading import Thread
+from multiprocessing import Process, Queue as MPQueue
 
 from uav.utils import FLOW_STD_MAX
 
@@ -113,15 +114,15 @@ def main():
     video_thread = Thread(target=video_worker, daemon=True)
     video_thread.start()
 
-    # Perception thread for image capture and optical flow
-    perception_queue: Queue = Queue(maxsize=1)
+    # Perception process for image capture and optical flow
+    perception_queue: MPQueue = MPQueue(maxsize=1)
 
-    def perception_worker() -> None:
-        nonlocal last_vis_img
-        # Use a dedicated RPC client to avoid cross-thread issues
+    def perception_worker(queue: MPQueue, flag) -> None:
+        last_vis_img = np.zeros((720, 1280, 3), dtype=np.uint8)
+        # Use a dedicated RPC client to avoid cross-process issues
         local_client = airsim.MultirotorClient()
         local_client.confirmConnection()
-        while not exit_flag.is_set():
+        while not flag.is_set():
             t0 = time.time()
             responses = local_client.simGetImages([
                 ImageRequest("oakd_camera", ImageType.Scene, False, True)
@@ -177,21 +178,20 @@ def main():
                         processing_s,
                     )
 
-            if perception_queue.full():
+            if queue.full():
                 try:
-                    perception_queue.get_nowait()
+                    queue.get_nowait()
                 except Exception:
                     pass
-            perception_queue.put(data)
+            queue.put(data)
 
-    perception_thread = Thread(target=perception_worker, daemon=True)
-    perception_thread.start()
+    perception_process = Process(target=perception_worker, args=(perception_queue, exit_flag), daemon=True)
+    perception_process.start()
 
     # Buffer log lines to throttle disk writes
     log_buffer = []
     LOG_INTERVAL = 5  # flush every 5 frames
 
-    last_vis_img = np.zeros((720, 1280, 3), dtype=np.uint8)  # Black frame as fallback
 
     target_fps = 20
     frame_duration = 1.0 / target_fps
@@ -491,7 +491,7 @@ def main():
         exit_flag.set()
         frame_queue.put(None)
         video_thread.join()
-        perception_thread.join()
+        perception_process.join()
         out.release()
         try:
             client.landAsync().join()
