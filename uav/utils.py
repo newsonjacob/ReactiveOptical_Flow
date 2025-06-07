@@ -57,7 +57,6 @@ def _timestamp_from_name(path: str) -> float:
 
 def retain_recent_logs(log_dir: str, keep: int = 5) -> None:
     """Keep only the ``keep`` most recent ``full_log_*.csv`` files."""
-
     try:
         files = [
             os.path.join(log_dir, f)
@@ -65,16 +64,18 @@ def retain_recent_logs(log_dir: str, keep: int = 5) -> None:
             if fnmatch.fnmatch(f, "full_log_*.csv")
         ]
     except FileNotFoundError:
+        print(f"⚠️ Log directory '{log_dir}' not found.")
         return
 
     files.sort(key=_timestamp_from_name, reverse=True)
+    print(f"🧹 Found {len(files)} logs, keeping {keep} most recent.")
 
     for old_file in files[keep:]:
         try:
+            print(f"🗑️ Deleting old log: {old_file}")
             os.remove(old_file)
-        except OSError:
-            pass
-
+        except OSError as e:
+            print(f"⚠️ Could not delete {old_file}: {e}")
 
 def should_flat_wall_dodge(
     center_mag: float,
