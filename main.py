@@ -189,7 +189,7 @@ def main():
 
     # Offload video writing to a background thread
     frame_queue: Queue = Queue(maxsize=20)
-
+    
     def video_worker() -> None:
         while not exit_flag.is_set() or not frame_queue.empty():
             frame = frame_queue.get()
@@ -200,6 +200,78 @@ def main():
 
     video_thread = Thread(target=video_worker, daemon=True)
     video_thread.start()
+
+    # Perception thread for image capture and optical flow
+    perception_queue: Queue = Queue(maxsize=1)
+
+    def perception_worker() -> None:
+        nonlocal last_vis_img
+        # Use a dedicated RPC client to avoid cross-thread issues
+        local_client = airsim.MultirotorClient()
+        local_client.confirmConnection()
+        request = [ImageRequest("oakd_camera", ImageType.Scene, False, True)]
+        while not exit_flag.is_set():
+            t0 = time.time()
+            responses = local_client.simGetImages(request)
+            t_fetch_end = time.time()
+            response = responses[0]
+            if (
+                response.width == 0
+                or response.height == 0
+                or len(response.image_data_uint8) == 0
+            ):
+                data = (
+                    last_vis_img,
+                    np.array([]),
+                    np.array([]),
+                    0.0,
+                    t_fetch_end - t0,
+                    0.0,
+                    0.0,
+                )
+            else:
+                img1d = np.frombuffer(response.image_data_uint8, dtype=np.uint8).copy()
+                img = cv2.imdecode(img1d, cv2.IMREAD_COLOR)
+                t_decode_end = time.time()
+                if img is None:
+                    continue
+                img = cv2.resize(img, (1280, 720))
+                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                vis_img = img.copy()
+                last_vis_img = vis_img
+                if tracker.prev_gray is None:
+                    tracker.initialize(gray)
+                    data = (
+                        vis_img,
+                        np.array([]),
+                        np.array([]),
+                        0.0,
+                        t_fetch_end - t0,
+                        t_decode_end - t_fetch_end,
+                        0.0,
+                    )
+                else:
+                    t_proc_start = time.time()
+                    good_old, flow_vectors, flow_std = tracker.process_frame(gray, t0)
+                    processing_s = time.time() - t_proc_start
+                    data = (
+                        vis_img,
+                        good_old,
+                        flow_vectors,
+                        flow_std,
+                        t_fetch_end - t0,
+                        t_decode_end - t_fetch_end,
+                        processing_s,
+                    )
+
+            try:
+                perception_queue.put(data, block=False)
+            except Exception:
+                # Drop frame if queue already contains an item
+                pass
+
+    perception_thread = Thread(target=perception_worker, daemon=True)
+    perception_thread.start()
 
     # Buffer log lines to throttle disk writes
     log_buffer = []
@@ -232,57 +304,23 @@ def main():
                 print("\U0001F3C1 Goal reached — landing.")
                 break
 
-            # --- Get image from AirSim ---
-            t0 = time.time()
-            responses = client.simGetImages([
-                ImageRequest("oakd_camera", ImageType.Scene, False, True)  # compress=True for JPEG
-            ])
-            t_fetch_end = time.time()
-            response = responses[0]
-            if response.width == 0 or response.height == 0 or len(response.image_data_uint8) == 0:
-                print("⚠️ Invalid image frame — skipping visual processing")
-                pos, yaw, speed = get_drone_state(client)
-                collision = client.simGetCollisionInfo()
-                collided = int(getattr(collision, "has_collided", False))
-
-                log_buffer.append(
-                    f"{frame_count},{time_now:.2f},0,0,0,0,0,"
-                    f"{pos.x_val:.2f},{pos.y_val:.2f},{pos.z_val:.2f},{yaw:.2f},{speed:.2f},no_image,{collided},0,"
-                    f"0,0,0,0,0,0,0,{time.time() - loop_start:.3f}\n"
-                )
-
-                try:
-                    frame_queue.put_nowait(last_vis_img)
-                except Exception:
-                    pass
-
-                if frame_count % LOG_INTERVAL == 0:
-                    log_file.writelines(log_buffer)
-                    log_buffer.clear()
-
+            # --- Retrieve perception results ---
+            try:
+                (
+                    vis_img,
+                    good_old,
+                    flow_vectors,
+                    flow_std,
+                    simgetimage_s,
+                    decode_s,
+                    processing_s,
+                ) = perception_queue.get(timeout=1.0)
+            except Exception:
                 continue
 
-            img1d = np.frombuffer(response.image_data_uint8, dtype=np.uint8)
-            img = cv2.imdecode(img1d, cv2.IMREAD_COLOR)
-            t_decode_end = time.time()
-            simgetimage_s = t_fetch_end - t0
-            decode_s = t_decode_end - t_fetch_end
-            if img is None:
-                try:
-                    frame_queue.put_nowait(last_vis_img)
-                except Exception:
-                    pass
-                continue
+            gray = cv2.cvtColor(vis_img, cv2.COLOR_BGR2GRAY)
 
-            # Resize to higher resolution for more detailed processing
-            img = cv2.resize(img, (1280, 720))
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            vis_img = img.copy()
-            last_vis_img = vis_img  # Update after a valid frame
-
-            if frame_count == 1:
-                tracker.initialize(gray)
-                print("Initialized optical flow tracker.")
+            if frame_count == 1 and len(good_old) == 0:
                 frame_queue.put(vis_img)
                 continue
 
@@ -290,8 +328,6 @@ def main():
                 print("🔧 Manual nudge forward for test")
                 client.moveByVelocityAsync(2, 0, 0, 2)
 
-            # --- Optical flow processing ---
-            good_old, flow_vectors, flow_std = tracker.process_frame(gray, start_time)
             magnitudes = np.linalg.norm(flow_vectors, axis=1)
             h, w = gray.shape
             good_old = good_old.reshape(-1, 2)  # Ensure proper shape
@@ -518,7 +554,7 @@ def main():
                 f"{smooth_L:.3f},{smooth_C:.3f},{smooth_R:.3f},{flow_std:.3f},"
                 f"{pos.x_val:.2f},{pos.y_val:.2f},{pos.z_val:.2f},{yaw:.2f},{speed:.2f},{state_str},{collided},{obstacle_detected},{int(side_safe)},"
                 f"{brake_thres:.2f},{dodge_thres:.2f},{probe_req:.2f},{actual_fps:.2f},"
-                f"{simgetimage_s:.3f},{decode_s:.3f},0.0,{loop_elapsed:.3f}\n"
+                f"{simgetimage_s:.3f},{decode_s:.3f},{processing_s:.3f},{loop_elapsed:.3f}\n"
             )
             if frame_count % LOG_INTERVAL == 0:
                 log_file.writelines(log_buffer)
@@ -536,8 +572,10 @@ def main():
             log_file.writelines(log_buffer)
             log_buffer.clear()
         log_file.close()
+        exit_flag.set()
         frame_queue.put(None)
         video_thread.join()
+        perception_thread.join()
         out.release()
         try:
             client.landAsync().join()
