@@ -203,7 +203,8 @@ def main():
 
     # Perception thread for image capture and optical flow
     perception_queue: Queue = Queue(maxsize=1)
-
+    last_vis_img = np.zeros((720, 1280, 3), dtype=np.uint8)
+    
     def perception_worker() -> None:
         nonlocal last_vis_img
         # Use a dedicated RPC client to avoid cross-thread issues
